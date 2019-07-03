@@ -78,7 +78,6 @@ class Column extends BaseColumn
                         ' * @Gedmo\Timestampable(on="create")')
                 ->writeIf($useBehavioralExtensions && $this->getColumnName() === 'updated_at',
                         ' * @Gedmo\Timestampable(on="update")')
-                ->write(' * '.$this->getTable()->getAnnotation('Column', $this->asAnnotation()))
                 ->writeIf($this->isAutoIncrement(),
                         ' * '.$this->getTable()->getAnnotation('GeneratedValue', array('strategy' => strtoupper($this->getConfig()->get(Formatter::CFG_GENERATED_VALUE_STRATEGY)))))
                 ->writeIf($isBehavioralColumn && strstr($this->getColumnName(), 'path'),
@@ -136,7 +135,7 @@ class Column extends BaseColumn
                 ->write(' *')
                 ->write(' * @return '.$nativeType)
                 ->write(' */')
-                ->write('public function '.$this->getColumnGetterName().'()')
+                ->write('public function get'.$this->getBeautifiedColumnName().'()')
                 ->write('{')
                 ->indent()
                     ->write('return $this->'.$this->getColumnName().';')
@@ -178,7 +177,7 @@ class Column extends BaseColumn
             $attributes['options']['jsonb'] = true;
         }
 
-        $rawDefaultValue = $this->parameters->get('defaultValue') == 'NULL' ? null : $this->parameters->get('defaultValue');
+        $rawDefaultValue = $this->getDefaultValue();
         if ($rawDefaultValue !== '') {
             $attributes['options']['default'] = $rawDefaultValue === '' ? null : $rawDefaultValue;
         }
