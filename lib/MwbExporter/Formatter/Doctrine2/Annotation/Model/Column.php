@@ -60,6 +60,20 @@ class Column extends BaseColumn
                 ->writeIf($comment, $comment)
                 ->writeIf($this->isPrimary,
                         ' * '.$this->getTable()->getAnnotation('Id'))
+            ;
+
+            if($this->isUuid()) {
+                $writer
+                    ->write(' * '.$this->getTable()->getAnnotation('Column', ['type' => 'uuid', 'unique' => true]))
+                    ->write(' * '.$this->getTable()->getAnnotation('GeneratedValue', array('strategy' => 'CUSTOM')))
+                    ->write(' * '.$this->getTable()->getAnnotation('CustomIdGenerator', array('class' => 'Ramsey\Uuid\Doctrine\UuidGenerator')))
+                ;
+            } else {
+                $writer
+                    ->write(' * '.$this->getTable()->getAnnotation('Column', $this->asAnnotation()));
+            }
+
+            $writer
                 ->writeIf($useBehavioralExtensions && $this->getColumnName() === 'created_at',
                         ' * @Gedmo\Timestampable(on="create")')
                 ->writeIf($useBehavioralExtensions && $this->getColumnName() === 'updated_at',

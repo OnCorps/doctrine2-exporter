@@ -73,15 +73,17 @@ class Table extends BaseTable
      * Get annotation prefix.
      *
      * @param string $annotation Annotation type
+     * @param string $prefix Prefix override
      * @return string
      */
-    public function addPrefix($annotation = null)
+    public function addPrefix($annotation = null, $prefix = null)
     {
         if (null === $this->ormPrefix) {
             $this->ormPrefix = '@'.$this->getConfig()->get(Formatter::CFG_ANNOTATION_PREFIX);
         }
+        $prefix = $prefix ?? $this->ormPrefix;
 
-        return $this->ormPrefix.($annotation ? $annotation : '');
+        return $prefix.($annotation ? $annotation : '');
     }
 
     /**
@@ -112,11 +114,12 @@ class Table extends BaseTable
      * @param string $annotation  The annotation name
      * @param mixed  $content     The annotation content
      * @param array  $options     The annotation options
+     * @param string $prefix      A prefix override if not the standard one
      * @return \MwbExporter\Object\Annotation
      */
-    public function getAnnotation($annotation, $content = null, $options = array())
+    public function getAnnotation($annotation, $content = null, $options = array(), $prefix = null)
     {
-        return new Annotation($this->addPrefix($annotation), $content, $options);
+        return new Annotation($this->addPrefix($annotation, $prefix), $content, $options);
     }
 
     /**
@@ -261,6 +264,7 @@ class Table extends BaseTable
             ->write(' * '.$this->getNamespace(null, false))
             ->write(' *')
             ->writeIf($comment, $comment)
+            ->writeIf($apiPlatform, ' * '.$this->getAnnotation('@ApiResource', null, [], ''))
             ->writeIf($extendableEntity, ' * @ORM\MappedSuperclass')
             ->writeIf($hasDeletableBehaviour,
                     ' * @Gedmo\SoftDeleteable(fieldName="deleted_at", timeAware=false)')
@@ -434,6 +438,9 @@ class Table extends BaseTable
         }
         if (count($this->getTableM2MRelations()) || count($this->getAllLocalForeignKeys())) {
             $uses[] = $this->getCollectionClass();
+        }
+        if($this->getConfig()->get(Formatter::CFG_API_PLATFORM_ANNOTATIONS)) {
+            $uses[] = 'ApiPlatform\Core\Annotation\ApiResource';
         }
 
         return $uses;

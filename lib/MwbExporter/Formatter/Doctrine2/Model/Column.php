@@ -121,4 +121,17 @@ class Column extends BaseColumn
 
         return false;
     }
+
+    public function isUuid($defaultValue = false)
+    {
+        //Infer from standard schema items
+        //return ($this->isPrimary()) && ($this->isUnique) && ($this->getLength() == 36);
+        //OR make explicit via a comment annotation:
+        if($uuidComment = $this->parseComment('generator')) {
+            if(strtolower($uuidComment) === 'uuid') {
+                return true;
+            }
+        }
+        return false;
+    }
 }

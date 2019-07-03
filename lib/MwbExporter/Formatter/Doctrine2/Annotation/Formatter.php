@@ -42,6 +42,7 @@ class Formatter extends BaseFormatter
     const CFG_EXTENDABLE_ENTITY_HAS_DISCRIMINATOR   = 'extendableEntityHasDiscriminator';
     const CFG_QUOTE_IDENTIFIER_STRATEGY             = 'quoteIdentifierStrategy';
     const CFG_USE_BEHAVIORAL_EXTENSIONS             = 'useBehavioralExtensions';
+    const CFG_API_PLATFORM_ANNOTATIONS              = 'apiPlatformAnnotations';
 
     const QUOTE_IDENTIFIER_AUTO                     = 'auto';
     const QUOTE_IDENTIFIER_ALWAYS                   = 'always';
@@ -62,6 +63,7 @@ class Formatter extends BaseFormatter
             static::CFG_QUOTE_IDENTIFIER_STRATEGY           => static::QUOTE_IDENTIFIER_AUTO,
             static::CFG_EXTENDS_CLASS                       => '',
             static::CFG_PROPERTY_TYPEHINT                   => false,
+            static::CFG_API_PLATFORM_ANNOTATIONS            => false,
         ));
         $this->addValidators(array(
             static::CFG_QUOTE_IDENTIFIER_STRATEGY           => new ChoiceValidator(array(
