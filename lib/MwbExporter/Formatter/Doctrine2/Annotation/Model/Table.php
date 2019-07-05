@@ -41,6 +41,7 @@ class Table extends BaseTable
     protected $ormPrefix = null;
     protected $collectionClass = 'Doctrine\Common\Collections\ArrayCollection';
     protected $collectionInterface = 'Doctrine\Common\Collections\Collection';
+    protected $relationVarNames = [];
 
     /**
      * Get the array collection class name.
@@ -573,6 +574,7 @@ class Table extends BaseTable
                     ->write('protected $'.lcfirst($this->getRelatedVarName($targetEntity, $related, true)).';')
                     ->write('')
                 ;
+                $this->relationVarNames[] = lcfirst($this->getRelatedVarName($targetEntity, $related, true));
             } else {
                 $this->getDocument()->addLog('  Relation considered as "1 <=> 1"');
 
@@ -584,6 +586,7 @@ class Table extends BaseTable
                     ->write('protected $'.lcfirst($targetEntity).';')
                     ->write('')
                 ;
+                $this->relationVarNames[] = lcfirst($targetEntity);
             }
         }
 
@@ -621,6 +624,7 @@ class Table extends BaseTable
                     ->write('protected $'.lcfirst($this->getRelatedVarName($targetEntity, $related)).';')
                     ->write('')
                 ;
+                $this->relationVarNames[] = lcfirst($this->getRelatedVarName($targetEntity, $related));
             } else {
                 $this->getDocument()->addLog('  Relation considered as "1 <=> 1"');
 
@@ -638,6 +642,7 @@ class Table extends BaseTable
                     ->write('protected $'.lcfirst($targetEntity).';')
                     ->write('')
                 ;
+                $this->relationVarNames[] = lcfirst($targetEntity);
             }
         }
 
@@ -708,6 +713,7 @@ class Table extends BaseTable
                 ->write('protected $'.lcfirst($relation['refTable']->getPluralModelName()).';')
                 ->write('')
             ;
+            $this->relationVarNames[] = lcfirst($relation['refTable']->getPluralModelName());
         }
 
         return $this;
@@ -1042,13 +1048,21 @@ class Table extends BaseTable
 
     public function writeSerialization(WriterInterface $writer)
     {
+        $varNames = $this->relationVarNames;
+        foreach ($this->getColumns() as $column) {
+            /** @var Column $column */
+            if(!$column->isIgnored()) {
+                print_r('ignoring: ' . $column->getColumnName());
+                $varNames[] = $column->getColumnName();
+            }
+        }
         $writer
             ->write('public function __sleep()')
             ->write('{')
             ->indent()
                 ->write('return array(%s);', implode(', ', array_map(function($column) {
                     return sprintf('\'%s\'', $column);
-                }, $this->getColumns()->getColumnNames())))
+                },$varNames))) // was $this->getColumns()->getColumnNames()
             ->outdent()
             ->write('}')
         ;
