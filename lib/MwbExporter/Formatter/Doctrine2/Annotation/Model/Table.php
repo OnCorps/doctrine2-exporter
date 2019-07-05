@@ -1052,7 +1052,6 @@ class Table extends BaseTable
         foreach ($this->getColumns() as $column) {
             /** @var Column $column */
             if(!$column->isIgnored()) {
-                print_r('ignoring: ' . $column->getColumnName());
                 $varNames[] = $column->getColumnName();
             }
         }
