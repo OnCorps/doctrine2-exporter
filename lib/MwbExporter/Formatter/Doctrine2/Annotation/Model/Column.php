@@ -64,9 +64,7 @@ class Column extends BaseColumn
 
             if($this->isUuid()) {
                 $writer
-                    ->write(' * '.$this->getTable()->getAnnotation('Column', ['type' => 'uuid', 'unique' => true]))
-                    ->write(' * '.$this->getTable()->getAnnotation('GeneratedValue', array('strategy' => 'CUSTOM')))
-                    ->write(' * '.$this->getTable()->getAnnotation('CustomIdGenerator', array('class' => 'Ramsey\Uuid\Doctrine\UuidGenerator')))
+                    ->write(' * '.$this->getTable()->getAnnotation('Column', ['type' => 'guid', 'unique' => true]))
                 ;
             } else {
                 $writer
@@ -112,24 +110,27 @@ class Column extends BaseColumn
                 $typehint = $shouldTypehintProperties && class_exists($nativeType) ? "?$nativeType " : '';
             }
 
-            $writer
-                // setter
-                ->write('/**')
-                ->write(' * Set the value of '.$this->getColumnName().'.')
-                ->write(' *')
-                ->write(' * @param '.$nativeType.' $'.$this->getColumnName())
-                ->write(' * @return '.$table->getNamespace())
-                ->write(' */')
-                ->write('public function set'.$this->getBeautifiedColumnName().'('.$typehint.'$'.$this->getColumnName().')')
-                ->write('{')
-                ->indent()
+            if(!$this->isPrimary) {
+                $writer
+                    // setter
+                    ->write('/**')
+                    ->write(' * Set the value of '.$this->getColumnName().'.')
+                    ->write(' *')
+                    ->write(' * @param '.$nativeType.' $'.$this->getColumnName())
+                    ->write(' * @return '.$table->getNamespace())
+                    ->write(' */')
+                    ->write('public function set'.$this->getBeautifiedColumnName().'('.$typehint.'$'.$this->getColumnName().')')
+                    ->write('{')
+                    ->indent()
                     ->write('$this->'.$this->getColumnName().' = $'.$this->getColumnName().';')
                     ->write('')
                     ->write('return $this;')
-                ->outdent()
-                ->write('}')
-                ->write('')
-                // getter
+                    ->outdent()
+                    ->write('}')
+                    ->write('');
+            }
+
+            $writer
                 ->write('/**')
                 ->write(' * Get the value of '.$this->getColumnName().'.')
                 ->write(' *')
