@@ -111,71 +111,11 @@ class Column extends BaseColumn
                 $typehint = $shouldTypehintProperties && class_exists($nativeType) ? "?$nativeType " : '';
             }
 
-            if ($this->isPrimary) {
-
-                if ($this->isImportedPrimaryKey()) {
-                    $writer
-                        ->write('/**')
-                        ->write(' * Set the value of ' . $this->getColumnName() . '.')
-                        ->write(' *')
-                        ->write(' * @param ' . $nativeType . ' $' . $this->getColumnName())
-                        ->write(' * @return ' . $table->getNamespace())
-                        ->write(' */')
-                        ->write('public function set' . $this->getBeautifiedColumnName() . '(' . $typehint . '$' . $this->getColumnName() . ')')
-                        ->write('{')
-                        ->indent()
-                        ->write('$this->' . $this->getColumnName() . ' = $' . $this->getColumnName() . ';')
-                        ->write('')
-                        ->write('return $this;')
-                        ->outdent()
-                        ->write('}')
-                        ->write('');
-                }
-
-                $writer->write('/**')
-                    ->write(' * Get the value of ' . $this->getColumnName() . '.')
-                    ->write(' *')
-                    ->write(' * @return ' . $nativeType)
-                    ->write(' */')
-                    ->write('public function get' . $this->getBeautifiedColumnName() . '()')
-                    ->write('{')
-                    ->indent()
-                    ->write('return $this->' . $this->getColumnName() . ';')
-                    ->outdent()
-                    ->write('}')
-                    ->write('');
-
-                return $this;
+            if (!$this->isPrimary || $this->isImportedPrimaryKey()) {
+                $this->writeSetter($writer, $nativeType, $table, $typehint);
             }
 
-            $writer
-                ->write('/**')
-                ->write(' * Set the value of '.$this->getColumnName().'.')
-                ->write(' *')
-                ->write(' * @param '.$nativeType.' $'.$this->getColumnName())
-                ->write(' * @return '.$table->getNamespace())
-                ->write(' */')
-                ->write('public function set'.$this->getBeautifiedColumnName().'('.$typehint.'$'.$this->getColumnName().')')
-                ->write('{')
-                ->indent()
-                ->write('$this->'.$this->getColumnName().' = $'.$this->getColumnName().';')
-                ->write('')
-                ->write('return $this;')
-                ->outdent()
-                ->write('}')
-                ->write('')
-                ->write('/**')
-                ->write(' * Get the value of '.$this->getColumnName().'.')
-                ->write(' *')
-                ->write(' * @return '.$nativeType)
-                ->write(' */')
-                ->write('public function get'.$this->getBeautifiedColumnName().'()')
-                ->write('{')
-                ->indent()
-                ->write('return $this->'.$this->getColumnName().';')
-                ->outdent()
-                ->write('}')
-                ->write('');
+            $this->writeGetter($writer, $nativeType);
         }
 
         return $this;
@@ -235,5 +175,51 @@ class Column extends BaseColumn
             ??
             false
         );
+    }
+
+    /**
+     * @param WriterInterface $writer
+     * @param string $nativeType
+     * @param Table $table
+     * @param string $typehint
+     */
+    private function writeSetter(WriterInterface $writer, string $nativeType, Table $table, string $typehint): void {
+        $columnName = $this->getColumnName();
+        $writer
+            ->write('/**')
+            ->write(' * Set the value of ' . $columnName . '.')
+            ->write(' *')
+            ->write(' * @param ' . $nativeType . ' $' . $columnName)
+            ->write(' * @return ' . $table->getNamespace())
+            ->write(' */')
+            ->write('public function set' . $this->getBeautifiedColumnName() . '(' . $typehint . '$' . $columnName . ')')
+            ->write('{')
+            ->indent()
+            ->write('$this->' . $columnName . ' = $' . $columnName . ';')
+            ->write('')
+            ->write('return $this;')
+            ->outdent()
+            ->write('}')
+            ->write('');
+    }
+
+    /**
+     * @param WriterInterface $writer
+     * @param string $nativeType
+     */
+    private function writeGetter(WriterInterface $writer, string $nativeType): void {
+        $columnName = $this->getColumnName();
+        $writer->write('/**')
+            ->write(' * Get the value of ' . $columnName . '.')
+            ->write(' *')
+            ->write(' * @return ' . $nativeType)
+            ->write(' */')
+            ->write('public function get' . $this->getBeautifiedColumnName() . '()')
+            ->write('{')
+            ->indent()
+            ->write('return $this->' . $columnName . ';')
+            ->outdent()
+            ->write('}')
+            ->write('');
     }
 }
