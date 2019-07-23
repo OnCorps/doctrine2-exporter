@@ -27,14 +27,13 @@
 
 namespace MwbExporter\Formatter\Doctrine2\Annotation\Model;
 
-use MwbExporter\Formatter\Doctrine2\Model\Table as BaseTable;
 use MwbExporter\Formatter\Doctrine2\Annotation\Formatter;
+use MwbExporter\Formatter\Doctrine2\Model\Table as BaseTable;
+use MwbExporter\Helper\Comment;
+use MwbExporter\Helper\ReservedWords;
 use MwbExporter\Model\ForeignKey;
 use MwbExporter\Object\Annotation;
 use MwbExporter\Writer\WriterInterface;
-use MwbExporter\Helper\Comment;
-use MwbExporter\Helper\ReservedWords;
-use Doctrine\Common\Inflector\Inflector;
 
 class Table extends BaseTable
 {
@@ -445,6 +444,10 @@ class Table extends BaseTable
             $uses[] = 'ApiPlatform\Core\Annotation\ApiResource';
         }
 
+        if($this->getConfig()->get(Formatter::CFG_RASMEY_UUID_PROVIDER)) {
+            $uses[] = 'Ramsey\Uuid\Uuid';
+        }
+
         return $uses;
     }
 
@@ -721,10 +724,22 @@ class Table extends BaseTable
 
     public function writeConstructor(WriterInterface $writer)
     {
+        $rasmeyUuidProvider  = $this->getConfig()->get(Formatter::CFG_RASMEY_UUID_PROVIDER);
+
+        /** @var Column $column */
+        foreach ($this->columns as $column) {
+            if ($column->isPrimary()) {
+                $id = $column->getName();
+            }
+        }
+
         $writer
-            ->write('public function __construct()')
+            ->writeIf($rasmeyUuidProvider, 'public function __construct(?string $uuid = null)')
+            ->writeIf(!$rasmeyUuidProvider, 'public function __construct()')
             ->write('{')
             ->indent()
+            ->writeIf($rasmeyUuidProvider, '$uuid = $uuid ? $uuid : Uuid::uuid1()->toString();')
+            ->writeIf(($rasmeyUuidProvider && $id), '$this->'.$id.' = $uuid;')
                 ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
                     $_this->writeCurrentTimestampConstructor($writer);
                     $_this->writeRelationsConstructor($writer);
