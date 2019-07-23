@@ -113,9 +113,7 @@ class Column extends BaseColumn
 
             if ($this->isPrimary) {
 
-                $isImportedPrimaryKey = $this->getComment(false) === CustomComment::PRIMARY_KEY_REQUIRES_EXTERNAL_IMPORT ?? false;
-
-                if ($isImportedPrimaryKey) {
+                if ($this->isImportedPrimaryKey()) {
                     $writer
                         ->write('/**')
                         ->write(' * Set the value of ' . $this->getColumnName() . '.')
@@ -222,5 +220,20 @@ class Column extends BaseColumn
         }
 
         return $attributes;
+    }
+
+    /**
+     * Checks if column is commented as requiring external id import
+     * @return bool
+     */
+    private function isImportedPrimaryKey(): bool {
+        return (bool)(
+            $this->parseComment(
+                CustomComment::PRIMARY_KEY_REQUIRES_EXTERNAL_IMPORT,
+                $this->getComment()
+            ) === 'true'
+            ??
+            false
+        );
     }
 }

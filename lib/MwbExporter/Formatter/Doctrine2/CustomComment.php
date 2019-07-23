@@ -11,5 +11,5 @@ namespace MwbExporter\Formatter\Doctrine2;
  */
 class CustomComment
 {
-    const PRIMARY_KEY_REQUIRES_EXTERNAL_IMPORT = '<d:external>true</d:external>';
+    const PRIMARY_KEY_REQUIRES_EXTERNAL_IMPORT = 'external_id';
 }
