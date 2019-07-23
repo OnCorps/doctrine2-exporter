@@ -27,8 +27,9 @@
 
 namespace MwbExporter\Formatter\Doctrine2\Annotation\Model;
 
-use MwbExporter\Formatter\Doctrine2\Model\Column as BaseColumn;
 use MwbExporter\Formatter\Doctrine2\Annotation\Formatter;
+use MwbExporter\Formatter\Doctrine2\CustomComment;
+use MwbExporter\Formatter\Doctrine2\Model\Column as BaseColumn;
 use MwbExporter\Writer\WriterInterface;
 
 class Column extends BaseColumn
@@ -110,27 +111,61 @@ class Column extends BaseColumn
                 $typehint = $shouldTypehintProperties && class_exists($nativeType) ? "?$nativeType " : '';
             }
 
-            if(!$this->isPrimary) {
-                $writer
-                    // setter
-                    ->write('/**')
-                    ->write(' * Set the value of '.$this->getColumnName().'.')
+            if ($this->isPrimary) {
+
+                $isImportedPrimaryKey = $this->getComment(false) === CustomComment::PRIMARY_KEY_REQUIRES_EXTERNAL_IMPORT ?? false;
+
+                if ($isImportedPrimaryKey) {
+                    $writer
+                        ->write('/**')
+                        ->write(' * Set the value of ' . $this->getColumnName() . '.')
+                        ->write(' *')
+                        ->write(' * @param ' . $nativeType . ' $' . $this->getColumnName())
+                        ->write(' * @return ' . $table->getNamespace())
+                        ->write(' */')
+                        ->write('public function set' . $this->getBeautifiedColumnName() . '(' . $typehint . '$' . $this->getColumnName() . ')')
+                        ->write('{')
+                        ->indent()
+                        ->write('$this->' . $this->getColumnName() . ' = $' . $this->getColumnName() . ';')
+                        ->write('')
+                        ->write('return $this;')
+                        ->outdent()
+                        ->write('}')
+                        ->write('');
+                }
+
+                $writer->write('/**')
+                    ->write(' * Get the value of ' . $this->getColumnName() . '.')
                     ->write(' *')
-                    ->write(' * @param '.$nativeType.' $'.$this->getColumnName())
-                    ->write(' * @return '.$table->getNamespace())
+                    ->write(' * @return ' . $nativeType)
                     ->write(' */')
-                    ->write('public function set'.$this->getBeautifiedColumnName().'('.$typehint.'$'.$this->getColumnName().')')
+                    ->write('public function get' . $this->getBeautifiedColumnName() . '()')
                     ->write('{')
                     ->indent()
-                    ->write('$this->'.$this->getColumnName().' = $'.$this->getColumnName().';')
-                    ->write('')
-                    ->write('return $this;')
+                    ->write('return $this->' . $this->getColumnName() . ';')
                     ->outdent()
                     ->write('}')
                     ->write('');
+
+                return $this;
             }
 
             $writer
+                ->write('/**')
+                ->write(' * Set the value of '.$this->getColumnName().'.')
+                ->write(' *')
+                ->write(' * @param '.$nativeType.' $'.$this->getColumnName())
+                ->write(' * @return '.$table->getNamespace())
+                ->write(' */')
+                ->write('public function set'.$this->getBeautifiedColumnName().'('.$typehint.'$'.$this->getColumnName().')')
+                ->write('{')
+                ->indent()
+                ->write('$this->'.$this->getColumnName().' = $'.$this->getColumnName().';')
+                ->write('')
+                ->write('return $this;')
+                ->outdent()
+                ->write('}')
+                ->write('')
                 ->write('/**')
                 ->write(' * Get the value of '.$this->getColumnName().'.')
                 ->write(' *')
@@ -139,11 +174,10 @@ class Column extends BaseColumn
                 ->write('public function get'.$this->getBeautifiedColumnName().'()')
                 ->write('{')
                 ->indent()
-                    ->write('return $this->'.$this->getColumnName().';')
+                ->write('return $this->'.$this->getColumnName().';')
                 ->outdent()
                 ->write('}')
-                ->write('')
-            ;
+                ->write('');
         }
 
         return $this;
