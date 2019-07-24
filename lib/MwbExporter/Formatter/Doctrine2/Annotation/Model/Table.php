@@ -730,16 +730,17 @@ class Table extends BaseTable
         foreach ($this->columns as $column) {
             if ($column->isPrimary()) {
                 $id = $column->getName();
+                $isUuid = $column->isUuid();
             }
         }
 
         $writer
-            ->writeIf($rasmeyUuidProvider, 'public function __construct(?string $uuid = null)')
-            ->writeIf(!$rasmeyUuidProvider, 'public function __construct()')
+            ->writeIf($rasmeyUuidProvider && $isUuid, 'public function __construct(?string $uuid = null)')
+            ->writeIf(!($rasmeyUuidProvider && $isUuid), 'public function __construct()')
             ->write('{')
             ->indent()
-            ->writeIf($rasmeyUuidProvider, '$uuid = $uuid ? $uuid : Uuid::uuid1()->toString();')
-            ->writeIf(($rasmeyUuidProvider && $id), '$this->'.$id.' = $uuid;')
+            ->writeIf($rasmeyUuidProvider && $isUuid, '$uuid = $uuid ? $uuid : Uuid::uuid1()->toString();')
+            ->writeIf(($rasmeyUuidProvider && $isUuid && $id), '$this->'.$id.' = $uuid;')
                 ->writeCallback(function(WriterInterface $writer, Table $_this = null) {
                     $_this->writeCurrentTimestampConstructor($writer);
                     $_this->writeRelationsConstructor($writer);
