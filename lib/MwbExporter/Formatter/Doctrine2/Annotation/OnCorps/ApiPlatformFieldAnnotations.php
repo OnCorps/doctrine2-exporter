@@ -10,18 +10,24 @@ namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
 
 use MwbExporter\Formatter\Doctrine2\Model;
 
+/**
+ * Class ApiPlatformFieldAnnotations
+ * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps
+ */
 abstract class ApiPlatformFieldAnnotations
 {
-
     /**
      * @param Model\Table $table
+     * @param string      $fieldName
      *
-     * @return $this
+     * @return string
      */
-    abstract function buildAnnotations(Model\Table $table);
+    abstract function buildAnnotationProperty(Model\Table $table, Model\Column $column, string $type): string;
 
     const COMMENT_FIELD_DELIMITER = ",";
     const COMMENT_FIELD_PROPERTIES_DELIMITER = ":";
+    const PROPERTIES_ANNOTATION_DELIMITER = ',';
+
     /**
      * @var array
      */
@@ -96,19 +102,48 @@ abstract class ApiPlatformFieldAnnotations
      *
      * @return string
      */
-    public function generateAnnotation(string $fieldName, ?string $typeKey = ""): string
+    public function generateAnnotationPropertyDetails(string $fieldName, ?string $typeKey = ""): string
     {
         $typeInfo = (object)$this->typeInfo[$typeKey];
-        $properties = '"'.$fieldName.'"';
+        $details = '"'.$fieldName.'"';
         if(count($this->fields[$fieldName]->modifiers)) {
-            $properties .= $typeInfo->delimiter.'"'.implode('"'.$typeInfo->delimiter.'"',$this->fields[$fieldName]->modifiers).'"';
+            $details .= $typeInfo->delimiter.'"'.implode('"'.$typeInfo->delimiter.'"',$this->fields[$fieldName]->modifiers).'"';
         } elseif(count($typeInfo->modifiers)) {
-            $properties .= $typeInfo->delimiter.'"'.implode('"'.$typeInfo->delimiter.'"',$typeInfo->modifiers).'"';
+            $details .= $typeInfo->delimiter.'"'.implode('"'.$typeInfo->delimiter.'"',$typeInfo->modifiers).'"';
         }
 
-        return '@ApiFilter('.$typeInfo->class.',properties={'.$properties.'})';
+        return $details;
     }
 
+    /**
+     * @param Model\Table $table
+     *
+     * @return $this
+     */
+    public function buildAnnotations(Model\Table $table)
+    {
+        $this->annotations = [];
+
+        foreach ($this->typeInfo as $type => $typeInfoArray) {
+            $typeInfo = (object)$typeInfoArray;
+            $properties = [];
+            /** @var Column $column */
+            foreach ($table->getColumns() as $column) {
+                $name = $column->getColumnName();
+                if (isset($this->fields[$name])) {
+                    $property = $this->buildAnnotationProperty($table, $column, $type);
+                    if(!empty($property)){
+                        $properties[] = $property;
+                    }
+                }
+            }
+            $propertiesAnnotation = implode(self::PROPERTIES_ANNOTATION_DELIMITER, $properties);
+            if(!empty($propertiesAnnotation)){
+                $this->annotations[] = '@ApiFilter('.$typeInfo->class.',properties={'.$propertiesAnnotation.'})';
+            }
+        }
+        return $this;
+    }
 
     /**
      * @return array

@@ -10,6 +10,10 @@ namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
 
 use MwbExporter\Formatter\Doctrine2\Model;
 
+/**
+ * Class ApiPlatformSearchAnnotations
+ * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps
+ */
 class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
 {
 
@@ -41,23 +45,19 @@ class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
 
     /**
      * @param Model\Table $table
+     * @param string      $fieldName
+     * @param string      $type
      *
-     * @return $this
+     * @return string
      */
-    public function buildAnnotations(Model\Table $table)
+    public function buildAnnotationProperty(Model\Table $table, Model\Column $column, string $type): string
     {
+        $name = $column->getColumnName();
         $converter = $table->getFormatter()->getDatatypeConverter();
-
-        /** @var Column $column */
-        foreach($table->getColumns() as $column) {
-            $name = $column->getColumnName();
-            if(isset($this->fields[$name])) {
-                $nativeType = $converter->getNativeType($converter->getMappedType($column));
-                if(isset($this->typeInfo[$nativeType])) {
-                    $this->annotations[] = $this->generateAnnotation($name, $nativeType);
-                }
-            }
+        $nativeType = $converter->getNativeType($converter->getMappedType($column));
+        if ($nativeType == $type) {
+            return $this->generateAnnotationPropertyDetails($name, $nativeType);
         }
-        return $this;
+        return "";
     }
 }

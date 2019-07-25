@@ -25,19 +25,15 @@ class ApiPlatformSortAnnotations extends ApiPlatformFieldAnnotations
 
     /**
      * @param Model\Table $table
+     * @param string      $fieldName
+     * @param string      $type
      *
-     * @return $this
+     * @return string
      */
-    public function buildAnnotations(Model\Table $table)
+    public function buildAnnotationProperty(Model\Table $table, Model\Column $column, string $type): string
     {
-        /** @var Column $column */
-        foreach($table->getColumns() as $column) {
-            $name = $column->getColumnName();
-            if(isset($this->fields[$name])) {
-                $this->annotations[] = $this->generateAnnotation($name, 'default');
-            }
-        }
-        return $this;
+        $name = $column->getColumnName();
+        return $this->generateAnnotationPropertyDetails($name, 'default');
     }
 
 }
