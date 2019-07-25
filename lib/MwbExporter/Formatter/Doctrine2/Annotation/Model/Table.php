@@ -28,6 +28,7 @@
 namespace MwbExporter\Formatter\Doctrine2\Annotation\Model;
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Formatter;
+use MwbExporter\Formatter\Doctrine2\CustomComment;
 use MwbExporter\Formatter\Doctrine2\Model\Table as BaseTable;
 use MwbExporter\Helper\Comment;
 use MwbExporter\Helper\ReservedWords;
@@ -814,8 +815,8 @@ class Table extends BaseTable
     protected function getApiPlatformAnnotations() {
 
         $classes = [
-            OnCorps\ApiPlatformSortAnnotations::class => $this->parseComment('sort'),
-            OnCorps\ApiPlatformSearchAnnotations::class => $this->parseComment('search'),
+            OnCorps\ApiPlatformSortAnnotations::class => $this->parseComment(CustomComment::API_PLATFORM_SORT),
+            OnCorps\ApiPlatformSearchAnnotations::class => $this->parseComment(CustomComment::API_PLATFORM_SEARCH),
         ];
         $annotations = [];
 
