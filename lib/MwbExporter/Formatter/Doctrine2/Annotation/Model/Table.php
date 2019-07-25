@@ -449,6 +449,9 @@ class Table extends BaseTable
         if (count($this->getTableM2MRelations()) || count($this->getAllLocalForeignKeys())) {
             $uses[] = $this->getCollectionClass();
         }
+        if($this->getConfig()->get(Formatter::CFG_RASMEY_UUID_PROVIDER)) {
+            $uses[] = 'Ramsey\Uuid\Uuid';
+        }
         if($this->getConfig()->get(Formatter::CFG_API_PLATFORM_ANNOTATIONS)) {
             $uses[] = 'ApiPlatform\Core\Annotation\ApiResource';
             $uses[] = 'ApiPlatform\Core\Annotation\ApiSubresource';
