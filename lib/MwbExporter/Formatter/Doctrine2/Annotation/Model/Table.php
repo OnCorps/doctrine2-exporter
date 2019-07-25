@@ -28,12 +28,14 @@
 namespace MwbExporter\Formatter\Doctrine2\Annotation\Model;
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Formatter;
+use MwbExporter\Formatter\Doctrine2\CustomComment;
 use MwbExporter\Formatter\Doctrine2\Model\Table as BaseTable;
 use MwbExporter\Helper\Comment;
 use MwbExporter\Helper\ReservedWords;
 use MwbExporter\Model\ForeignKey;
 use MwbExporter\Object\Annotation;
 use MwbExporter\Writer\WriterInterface;
+use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
 
 class Table extends BaseTable
 {
@@ -220,6 +222,7 @@ class Table extends BaseTable
         $useBehavioralExtensions = $this->getConfig()->get(Formatter::CFG_USE_BEHAVIORAL_EXTENSIONS);
         $lifecycleCallbacks  = $this->getLifecycleCallbacks();
         $cacheMode           = $this->getEntityCacheMode();
+        $filterAnnotations   = $this->getApiPlatformAnnotations();
 
         $namespace = $this->getEntityNamespace().($extendableEntity ? '\\Base' : '');
 
@@ -265,7 +268,13 @@ class Table extends BaseTable
             ->write(' * '.$this->getNamespace(null, false))
             ->write(' *')
             ->writeIf($comment, $comment)
-            ->writeIf($apiPlatform, ' * '.$this->getAnnotation('@ApiResource', null, [], ''))
+            ->writeIf($apiPlatform, ' * '.$this->getAnnotation('@ApiResource', null, [], ''));
+
+        foreach($filterAnnotations as $filterAnnotation) {
+            $writer->write(' * '.$filterAnnotation);
+        }
+
+        $writer
             ->writeIf($extendableEntity, ' * @ORM\MappedSuperclass')
             ->writeIf($hasDeletableBehaviour,
                     ' * @Gedmo\SoftDeleteable(fieldName="deleted_at", timeAware=false)')
@@ -442,10 +451,13 @@ class Table extends BaseTable
         }
         if($this->getConfig()->get(Formatter::CFG_API_PLATFORM_ANNOTATIONS)) {
             $uses[] = 'ApiPlatform\Core\Annotation\ApiResource';
-        }
-
-        if($this->getConfig()->get(Formatter::CFG_RASMEY_UUID_PROVIDER)) {
-            $uses[] = 'Ramsey\Uuid\Uuid';
+            $uses[] = 'ApiPlatform\Core\Annotation\ApiSubresource';
+            $uses[] = 'ApiPlatform\Core\Annotation\ApiFilter';
+            $uses[] = 'ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter';
+            $uses[] = 'ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter';
+            $uses[] = 'ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter';
+            $uses[] = 'ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter';
+            $uses[] = 'ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter';
         }
 
         return $uses;
@@ -798,6 +810,27 @@ class Table extends BaseTable
         foreach ($this->getColumns() as $column) {
             $column->writeGetterAndSetter($writer);
         }
+    }
+
+    protected function getApiPlatformAnnotations() {
+
+        $classes = [
+            OnCorps\ApiPlatformSortAnnotations::class => $this->parseComment(CustomComment::API_PLATFORM_SORT),
+            OnCorps\ApiPlatformSearchAnnotations::class => $this->parseComment(CustomComment::API_PLATFORM_SEARCH),
+        ];
+        $annotations = [];
+
+        foreach($classes as $class => $comment){
+            $provider = new $class;
+            $annotations = array_merge(
+                $annotations,
+                $provider
+                    ->processFields($comment)
+                    ->buildAnnotations($this)
+                    ->getAnnotations()
+            );
+        }
+        return $annotations;
     }
 
     protected function writeRelationsGetterAndSetter(WriterInterface $writer)
