@@ -115,6 +115,12 @@ class Column extends BaseColumn
                 $this->writeSetter($writer, $nativeType, $table, $typehint);
             }
 
+            if($this->isImportedPrimaryKey()) {
+                //Helpful for external tooling and code needed to understand what is the primary key
+                //without reling on the assumption that is always called "id"
+                $this->writePrimaryKeyFetcher($writer, $nativeType);
+            }
+
             $this->writeGetter($writer, $nativeType);
         }
 
@@ -215,6 +221,22 @@ class Column extends BaseColumn
             ->write(' * @return ' . $nativeType)
             ->write(' */')
             ->write('public function get' . $this->getBeautifiedColumnName() . '()')
+            ->write('{')
+            ->indent()
+            ->write('return $this->' . $columnName . ';')
+            ->outdent()
+            ->write('}')
+            ->write('');
+    }
+
+    private function writePrimaryKeyFetcher(WriterInterface $writer, string $nativeType) {
+        $columnName = $this->getColumnName();
+        $writer->write('/**')
+            ->write(' * Get the value of ' . $columnName . '.')
+            ->write(' *')
+            ->write(' * @return ' . $nativeType)
+            ->write(' */')
+            ->write('public function fetchId()')
             ->write('{')
             ->indent()
             ->write('return $this->' . $columnName . ';')
