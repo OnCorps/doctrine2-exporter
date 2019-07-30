@@ -9,6 +9,7 @@
 namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
 
 use MwbExporter\Formatter\Doctrine2\Model;
+use MwbExporter\Model\ForeignKey;
 
 /**
  * Class ApiPlatformSearchAnnotations
@@ -55,8 +56,23 @@ class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
         $name = $column->getColumnName();
         $converter = $table->getFormatter()->getDatatypeConverter();
         $nativeType = $converter->getNativeType($converter->getMappedType($column));
+        $foreginKeys = $column->getForeignKeys();
+        $filterName = null;
+        /** @var ForeignKey $foreign */
+        foreach($foreginKeys as $foreign) {
+            $targetEntity = $foreign->getReferencedTable()->getModelName();
+            $related = $table->getRelatedName($foreign);
+            $filterName = lcfirst($table->getRelatedVarName($targetEntity, $related));
+            if(count($foreginKeys) > 1) {
+                //Putting a break here because at this point I don't know when/how there would be more than one fk entry
+                //but I don't want to just assume the last entry is the correct one or if some compound approach may be required.
+                //Going to assume first and use that and then write to output and warn user
+                print_r("Multiple foreign keys found on column {$name} for {$targetEntity} on table {$table->getName()}\n");
+                break;
+            }
+        }
         if ($nativeType == $type) {
-            return $this->generateAnnotationPropertyDetails($name, $nativeType);
+            return $this->generateAnnotationPropertyDetails($filterName ?? $name, $nativeType);
         }
         return "";
     }
