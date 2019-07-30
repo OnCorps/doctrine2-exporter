@@ -28,6 +28,9 @@
 namespace MwbExporter\Formatter\Doctrine2\Annotation\Model;
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Formatter;
+use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
+use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion\ClassLevelAssertionBuilderProvider;
+use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion\PropertyLevelAssertionBuilderProvider;
 use MwbExporter\Formatter\Doctrine2\CustomComment;
 use MwbExporter\Formatter\Doctrine2\Model\Table as BaseTable;
 use MwbExporter\Helper\Comment;
@@ -35,7 +38,6 @@ use MwbExporter\Helper\ReservedWords;
 use MwbExporter\Model\ForeignKey;
 use MwbExporter\Object\Annotation;
 use MwbExporter\Writer\WriterInterface;
-use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
 
 class Table extends BaseTable
 {
@@ -163,6 +165,7 @@ class Table extends BaseTable
      */
     public function getJoinAnnotation($joinType, $entity, $mappedBy = null, $inversedBy = null)
     {
+        
         return $this->getAnnotation($joinType, array('targetEntity' => $entity, 'mappedBy' => $mappedBy, 'inversedBy' => $inversedBy));
     }
 
@@ -224,6 +227,9 @@ class Table extends BaseTable
         $cacheMode           = $this->getEntityCacheMode();
         $filterAnnotations   = $this->getApiPlatformAnnotations();
 
+        $classLevelAssertionAnnotationsBuilder = (new ClassLevelAssertionBuilderProvider())->getClassLevelAssertionBuilder();
+        $classLevelAssertionAnnotations = $classLevelAssertionAnnotationsBuilder->buildAnnotations($this);
+
         $namespace = $this->getEntityNamespace().($extendableEntity ? '\\Base' : '');
 
         $extendsClass = $this->getClassToExtend();
@@ -269,6 +275,12 @@ class Table extends BaseTable
             ->write(' *')
             ->writeIf($comment, $comment)
             ->writeIf($apiPlatform, ' * '.$this->getAnnotation('@ApiResource', null, [], ''));
+
+        if ($classLevelAssertionAnnotations) {
+            foreach ($classLevelAssertionAnnotations as $classLevelAssertionAnnotation) {
+                $writer->writeIf($classLevelAssertionAnnotation, $classLevelAssertionAnnotation);
+            }
+        }
 
         foreach($filterAnnotations as $filterAnnotation) {
             $writer->write(' * '.$filterAnnotation);
@@ -462,6 +474,12 @@ class Table extends BaseTable
             $uses[] = 'ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter';
             $uses[] = 'ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter';
         }
+
+        $assertionBuilder = (new ClassLevelAssertionBuilderProvider());
+        $uses = array_merge($uses, $assertionBuilder->getUsages());
+
+        $columnUsages = (new PropertyLevelAssertionBuilderProvider())->getUsages();
+        $uses = array_merge($uses, $columnUsages);
 
         return $uses;
     }
@@ -835,7 +853,7 @@ class Table extends BaseTable
         }
         return $annotations;
     }
-
+    
     protected function writeRelationsGetterAndSetter(WriterInterface $writer)
     {
         // N <=> 1 references

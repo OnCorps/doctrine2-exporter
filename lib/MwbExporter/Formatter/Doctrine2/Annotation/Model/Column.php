@@ -28,6 +28,7 @@
 namespace MwbExporter\Formatter\Doctrine2\Annotation\Model;
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Formatter;
+use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion\PropertyLevelAssertionBuilderProvider;
 use MwbExporter\Formatter\Doctrine2\CustomComment;
 use MwbExporter\Formatter\Doctrine2\Model\Column as BaseColumn;
 use MwbExporter\Writer\WriterInterface;
@@ -52,6 +53,9 @@ class Column extends BaseColumn
 
     public function writeVar(WriterInterface $writer)
     {
+        $propertyLevelBuilder = (new PropertyLevelAssertionBuilderProvider())->getPropertyLevelAssertionBuilder();
+        $columnAssertions = $propertyLevelBuilder->buildAnnotations($this);
+
         if (!$this->isIgnored()) {
             $useBehavioralExtensions = $this->getConfig()->get(Formatter::CFG_USE_BEHAVIORAL_EXTENSIONS);
             $isBehavioralColumn = strstr($this->getTable()->getName(), '_img') && $useBehavioralExtensions;
@@ -62,6 +66,12 @@ class Column extends BaseColumn
                 ->writeIf($this->isPrimary,
                         ' * '.$this->getTable()->getAnnotation('Id'))
             ;
+
+            if ($columnAssertions) {
+                foreach ($columnAssertions as $columnAssertion) {
+                    $writer->writeIf($columnAssertion, $columnAssertion);
+                }
+            }
 
             if($this->isUuid()) {
                 $writer
@@ -91,7 +101,7 @@ class Column extends BaseColumn
                 ->write('protected $'.$this->getColumnName().$this->getStringDefaultValue().';')
                 ->write('')
             ;
-        }
+        } 
 
         return $this;
     }
