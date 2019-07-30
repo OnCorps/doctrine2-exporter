@@ -13,7 +13,7 @@ use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
  */
 class UniqueEntityAssertion implements ClassLevelAssertionAnnotationInterface
 {
-    public function buildAnnotation(Table $table): string
+    public function buildAnnotation(Table $table): ?string
     {
         $primaries = [];
         foreach ($table->getColumns() as $column) {
