@@ -5,6 +5,7 @@ namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion;
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
+use MwbExporter\Object\Annotation;
 
 class PropertyLevelAssertionAnnotationBuilder extends PropertyLevelAssertionAnnotationStack
 {
@@ -25,7 +26,7 @@ class PropertyLevelAssertionAnnotationBuilder extends PropertyLevelAssertionAnno
      */
     public function buildAnnotations(Column $column): ?array
     {
-        $classLevelAnnotations = [];
+        $propertyLevelAnnotations = [];
 
         /** @var PropertyLevelAssertionAnnotationInterface $assertionAnnotationClass */
         foreach ($this->getStack() as $assertionAnnotationClass) {
@@ -39,6 +40,45 @@ class PropertyLevelAssertionAnnotationBuilder extends PropertyLevelAssertionAnno
         }
 
         if (count($propertyLevelAnnotations) == 0) {
+            return null;
+        }
+
+        return $propertyLevelAnnotations;
+    }
+
+    /**
+     * @param Annotation $joinAnnotation
+     *
+     * @return array|null
+     * @throws \ReflectionException
+     */
+    public function buildAnnotationsForJoinColumn(Annotation $joinAnnotation) {
+        $propertyLevelAnnotations = [];
+
+        //force access the ORM annotation to then pass his content to the stack
+        //which would decide if write the annotations or not
+        //try catch all as we'd rather loose an annotation than everything else
+        try{
+            $reflection = new \ReflectionClass($joinAnnotation);
+            $property = $reflection->getProperty('content');
+            $property->setAccessible(true);
+            $annotationContent = $property->getValue($joinAnnotation);
+
+            /** @var PropertyLevelAssertionAnnotationInterface $assertionAnnotationClass */
+            foreach ($this->getStack() as $assertionAnnotationClass) {
+                try {
+                    $propertyLevelAnnotations[] = $assertionAnnotationClass->buildAnnotationForJoinColumn($annotationContent);
+                    //don't let one break all the others:
+                } catch (\Exception $exception) {
+                    //@todo a logger would be better here:
+                    echo $exception->getMessage();
+                }
+            }
+
+            if (count($propertyLevelAnnotations) == 0) {
+                return null;
+            }
+        }catch (\Exception $exception){
             return null;
         }
 

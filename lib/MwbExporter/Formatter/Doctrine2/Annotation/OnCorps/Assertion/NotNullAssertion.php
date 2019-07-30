@@ -5,6 +5,7 @@ namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion;
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
+use MwbExporter\Object\Annotation;
 
 /**
  * Builds Unique Entity assertion analysing the primaries in the table.
@@ -20,6 +21,16 @@ class NotNullAssertion implements PropertyLevelAssertionAnnotationInterface
             return ' * @NotNull()';
         }
 
+        return null;
+    }
+
+    public function buildAnnotationForJoinColumn(array $joinAnnotation): ?string
+    {
+        if(isset($joinAnnotation['nullable'])) {
+            if($joinAnnotation['nullable'] == false) {
+                return ' * @NotNull()';
+            }
+        }
         return null;
     }
 
