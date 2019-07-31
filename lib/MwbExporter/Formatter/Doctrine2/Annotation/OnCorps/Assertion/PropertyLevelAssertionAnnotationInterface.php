@@ -8,4 +8,6 @@ use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;
 interface PropertyLevelAssertionAnnotationInterface extends AssertionAnnotationInterface
 {
     public function buildAnnotation(Column $table): ?string;
+
+    public function buildAnnotationForJoinColumn(array $annotationContent): ?string;
 }

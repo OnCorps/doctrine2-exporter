@@ -165,7 +165,6 @@ class Table extends BaseTable
      */
     public function getJoinAnnotation($joinType, $entity, $mappedBy = null, $inversedBy = null)
     {
-        
         return $this->getAnnotation($joinType, array('targetEntity' => $entity, 'mappedBy' => $mappedBy, 'inversedBy' => $inversedBy));
     }
 
@@ -191,7 +190,6 @@ class Table extends BaseTable
                 'onDelete'              => $onDelete,
             ));
         }
-
         return count($joins) > 1 ? $this->getAnnotation('JoinColumns', array($joins), array('multiline' => true, 'wrapper' => ' * %s')) : $joins[0];
     }
 
@@ -281,6 +279,7 @@ class Table extends BaseTable
                 $writer->writeIf($classLevelAssertionAnnotation, $classLevelAssertionAnnotation);
             }
         }
+
 
         foreach($filterAnnotations as $filterAnnotation) {
             $writer->write(' * '.$filterAnnotation);
@@ -598,8 +597,12 @@ class Table extends BaseTable
                     ->write('/**')
                     ->writeIf($cacheMode, ' * '.$this->getAnnotation('Cache', array($cacheMode)))
                     ->write(' * '.$this->getAnnotation('OneToMany', $annotationOptions))
-                    ->write(' * '.$this->getJoins($local))
-                    ->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($local) {
+                    ->write(' * '.$this->getJoins($local));
+
+                $this->writeAnnotationAssertionsGivenJoinAnnotation($writer, $this->getJoins($local));
+
+
+                $writer->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($local) {
                         if (count($orders = $_this->getFormatter()->getOrderOption($local->parseComment('order')))) {
                             $writer
                                 ->write(' * '.$_this->getAnnotation('OrderBy', array($orders)))
@@ -617,8 +620,11 @@ class Table extends BaseTable
                 $writer
                     ->write('/**')
                     ->writeIf($cacheMode, ' * '.$this->getAnnotation('Cache', array($cacheMode)))
-                    ->write(' * '.$this->getAnnotation('OneToOne', $annotationOptions))
-                    ->write(' */')
+                    ->write(' * '.$this->getAnnotation('OneToOne', $annotationOptions));
+
+                $this->writeAnnotationAssertionsGivenJoinAnnotation($writer,$this->getAnnotation('OneToOne', $annotationOptions));
+
+                $writer->write(' */')
                     ->write('protected $'.lcfirst($targetEntity).';')
                     ->write('')
                 ;
@@ -655,7 +661,11 @@ class Table extends BaseTable
                     ->write('/**')
                     ->writeIf($cacheMode, ' * '.$this->getAnnotation('Cache', array($cacheMode)))
                     ->write(' * '.$this->getAnnotation('ManyToOne', $annotationOptions))
-                    ->write(' * '.$this->getJoins($foreign, false))
+                    ->write(' * '.$this->getJoins($foreign, false));
+
+                $this->writeAnnotationAssertionsGivenJoinAnnotation($writer, $this->getJoins($foreign));
+
+                $writer
                     ->write(' */')
                     ->write('protected $'.lcfirst($this->getRelatedVarName($targetEntity, $related)).';')
                     ->write('')
@@ -673,8 +683,10 @@ class Table extends BaseTable
                     ->write('/**')
                     ->writeIf($cacheMode, ' * '.$this->getAnnotation('Cache', array($cacheMode)))
                     ->write(' * '.$this->getAnnotation('OneToOne', $annotationOptions))
-                    ->write(' * '.$this->getJoins($foreign, false))
-                    ->write(' */')
+                    ->write(' * '.$this->getJoins($foreign, false));
+                    $this->writeAnnotationAssertionsGivenJoinAnnotation($writer, $this->getJoins($foreign));
+
+                    $writer->write(' */')
                     ->write('protected $'.lcfirst($targetEntity).';')
                     ->write('')
                 ;
@@ -1137,5 +1149,13 @@ class Table extends BaseTable
         ;
 
         return $this;
+    }
+
+    private function writeAnnotationAssertionsGivenJoinAnnotation(WriterInterface $writer, Annotation $joinAnnotation): void {
+        $propertyLevelBuilder = (new PropertyLevelAssertionBuilderProvider())->getPropertyLevelAssertionBuilder();
+        $joinColumnAssertions = $propertyLevelBuilder->buildAnnotationsForJoinColumn($joinAnnotation);
+        foreach ($joinColumnAssertions as $joinColumnAssertion) {
+            $writer->write($joinColumnAssertion);
+        }
     }
 }
