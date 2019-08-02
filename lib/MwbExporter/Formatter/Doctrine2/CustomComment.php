@@ -14,4 +14,5 @@ class CustomComment
     const PRIMARY_KEY_REQUIRES_EXTERNAL_IMPORT = 'external_id';
     const API_PLATFORM_SEARCH = 'search';
     const API_PLATFORM_SORT = 'sort';
+    const API_PLATFORM_PAGINATION = 'pagination';
 }

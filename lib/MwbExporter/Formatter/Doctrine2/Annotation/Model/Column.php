@@ -32,9 +32,13 @@ use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion\PropertyLevelAs
 use MwbExporter\Formatter\Doctrine2\CustomComment;
 use MwbExporter\Formatter\Doctrine2\Model\Column as BaseColumn;
 use MwbExporter\Writer\WriterInterface;
+use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
 
 class Column extends BaseColumn
 {
+
+    use OnCorps\ApiPlatformColumnExtensions;
+
     private function getStringDefaultValue() {
         $defaultValue = $this->getDefaultValue();
         if (is_null($defaultValue) || 'CURRENT_TIMESTAMP' == $defaultValue) {
@@ -130,6 +134,8 @@ class Column extends BaseColumn
                 //without reling on the assumption that is always called "id"
                 $this->writePrimaryKeyFetcher($writer, $nativeType);
             }
+
+            $this->writeIdColumnGetter($writer, $nativeType);
 
             $this->writeGetter($writer, $nativeType);
         }
@@ -231,22 +237,6 @@ class Column extends BaseColumn
             ->write(' * @return ' . $nativeType)
             ->write(' */')
             ->write('public function get' . $this->getBeautifiedColumnName() . '()')
-            ->write('{')
-            ->indent()
-            ->write('return $this->' . $columnName . ';')
-            ->outdent()
-            ->write('}')
-            ->write('');
-    }
-
-    private function writePrimaryKeyFetcher(WriterInterface $writer, string $nativeType) {
-        $columnName = $this->getColumnName();
-        $writer->write('/**')
-            ->write(' * Get the value of ' . $columnName . '.')
-            ->write(' *')
-            ->write(' * @return ' . $nativeType)
-            ->write(' */')
-            ->write('public function fetchId()')
             ->write('{')
             ->indent()
             ->write('return $this->' . $columnName . ';')

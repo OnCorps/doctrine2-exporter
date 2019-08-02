@@ -53,9 +53,12 @@ class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
      */
     public function buildAnnotationProperty(Model\Table $table, Model\Column $column, string $type): string
     {
-        $name = $column->getColumnName();
         $converter = $table->getFormatter()->getDatatypeConverter();
         $nativeType = $converter->getNativeType($converter->getMappedType($column));
+        if ($nativeType != $type) {
+            return '';
+        }
+        $name = $column->getColumnName();
         $foreginKeys = $column->getForeignKeys();
         $filterName = null;
         /** @var ForeignKey $foreign */
@@ -63,6 +66,16 @@ class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
             $targetEntity = $foreign->getReferencedTable()->getModelName();
             $related = $table->getRelatedName($foreign);
             $filterName = lcfirst($table->getRelatedVarName($targetEntity, $related));
+            if(!(
+                in_array('partial', $this->fields[$name]->modifiers)
+                    ||
+                in_array('exact', $this->fields[$name]->modifiers)
+                )
+            ) {
+                //Unless there is an explicit override for then the default for an FK is exact
+                $this->fields[$name]->modifiers[] = 'exact';
+            };
+            $this->fields[$name]->filterName = $filterName;
             if(count($foreginKeys) > 1) {
                 //Putting a break here because at this point I don't know when/how there would be more than one fk entry
                 //but I don't want to just assume the last entry is the correct one or if some compound approach may be required.
@@ -71,9 +84,9 @@ class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
                 break;
             }
         }
-        if ($nativeType == $type) {
-            return $this->generateAnnotationPropertyDetails($filterName ?? $name, $nativeType);
-        }
-        return "";
+
+        return $this->generateAnnotationPropertyDetails($name, $nativeType);
+
+
     }
 }
