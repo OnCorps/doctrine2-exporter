@@ -218,15 +218,10 @@ class Table extends BaseTable
         $skipGetterAndSetter = $this->getConfig()->get(Formatter::CFG_SKIP_GETTER_SETTER);
         $serializableEntity  = $this->getConfig()->get(Formatter::CFG_GENERATE_ENTITY_SERIALIZATION);
         $extendableEntity    = $this->getConfig()->get(Formatter::CFG_GENERATE_EXTENDABLE_ENTITY);
-        $apiPlatform         = $this->getConfig()->get(Formatter::CFG_API_PLATFORM_ANNOTATIONS);
         $extendableEntityHasDiscriminator = $this->getConfig()->get(Formatter::CFG_EXTENDABLE_ENTITY_HAS_DISCRIMINATOR);
         $useBehavioralExtensions = $this->getConfig()->get(Formatter::CFG_USE_BEHAVIORAL_EXTENSIONS);
         $lifecycleCallbacks  = $this->getLifecycleCallbacks();
         $cacheMode           = $this->getEntityCacheMode();
-        $filterAnnotations   = $this->getApiPlatformAnnotations();
-
-        $classLevelAssertionAnnotationsBuilder = (new ClassLevelAssertionBuilderProvider())->getClassLevelAssertionBuilder();
-        $classLevelAssertionAnnotations = $classLevelAssertionAnnotationsBuilder->buildAnnotations($this);
 
         $namespace = $this->getEntityNamespace().($extendableEntity ? '\\Base' : '');
 
@@ -271,18 +266,30 @@ class Table extends BaseTable
             ->write('/**')
             ->write(' * '.$this->getNamespace(null, false))
             ->write(' *')
-            ->writeIf($comment, $comment)
-            ->writeIf($apiPlatform, ' * '.$this->getAnnotation('@ApiResource', null, [], ''));
+            ->writeIf($comment, $comment);
 
-        if ($classLevelAssertionAnnotations) {
-            foreach ($classLevelAssertionAnnotations as $classLevelAssertionAnnotation) {
-                $writer->writeIf($classLevelAssertionAnnotation, $classLevelAssertionAnnotation);
+        $apiPlatformManager = new OnCorps\ApiPlatformManager($this);
+
+        $apiResourceAnnotations = $apiPlatformManager->getApiResourceAnnotations();
+        if($apiResourceAnnotations) {
+            foreach($apiResourceAnnotations as $apiResourceAnnotation) {
+                $writer->write(' * ' . $apiResourceAnnotation);
             }
         }
 
+        $filterAnnotations = $apiPlatformManager->getApiFilterAnnotations();
+        if($filterAnnotations) {
+            foreach ($filterAnnotations as $filterAnnotation) {
+                $writer->write(' * ' . $filterAnnotation);
+            }
+        }
 
-        foreach($filterAnnotations as $filterAnnotation) {
-            $writer->write(' * '.$filterAnnotation);
+        $classLevelAssertionAnnotationsBuilder = (new ClassLevelAssertionBuilderProvider())->getClassLevelAssertionBuilder();
+        $classLevelAssertionAnnotations = $classLevelAssertionAnnotationsBuilder->buildAnnotations($this);
+        if ($classLevelAssertionAnnotations) {
+            foreach ($classLevelAssertionAnnotations as $classLevelAssertionAnnotation) {
+                $writer->write($classLevelAssertionAnnotation);
+            }
         }
 
         $writer
@@ -843,27 +850,6 @@ class Table extends BaseTable
         foreach ($this->getColumns() as $column) {
             $column->writeGetterAndSetter($writer);
         }
-    }
-
-    protected function getApiPlatformAnnotations() {
-
-        $classes = [
-            OnCorps\ApiPlatformSortAnnotations::class => $this->parseComment(CustomComment::API_PLATFORM_SORT),
-            OnCorps\ApiPlatformSearchAnnotations::class => $this->parseComment(CustomComment::API_PLATFORM_SEARCH),
-        ];
-        $annotations = [];
-
-        foreach($classes as $class => $comment){
-            $provider = new $class;
-            $annotations = array_merge(
-                $annotations,
-                $provider
-                    ->processFields($comment)
-                    ->buildAnnotations($this)
-                    ->getAnnotations()
-            );
-        }
-        return $annotations;
     }
     
     protected function writeRelationsGetterAndSetter(WriterInterface $writer)

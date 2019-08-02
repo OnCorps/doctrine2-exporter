@@ -88,6 +88,7 @@ abstract class ApiPlatformFieldAnnotations
             if (count($rawFilterDetails) > 0 && $rawFilterDetails[0] != "") {
                 $name = array_shift($rawFilterDetails);
                 $this->fields[$name] =  (object)[
+                    'filterName' => $name,
                     'name' => $name,
                     'modifiers' => $rawFilterDetails
                 ];
@@ -105,7 +106,7 @@ abstract class ApiPlatformFieldAnnotations
     public function generateAnnotationPropertyDetails(string $fieldName, ?string $typeKey = ""): string
     {
         $typeInfo = (object)$this->typeInfo[$typeKey];
-        $details = '"'.$fieldName.'"';
+        $details = '"'.$this->fields[$fieldName]->filterName.'"';
         if(count($this->fields[$fieldName]->modifiers)) {
             $details .= $typeInfo->delimiter.'"'.implode('"'.$typeInfo->delimiter.'"',$this->fields[$fieldName]->modifiers).'"';
         } elseif(count($typeInfo->modifiers)) {
