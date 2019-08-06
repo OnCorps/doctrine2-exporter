@@ -44,9 +44,10 @@ class ApiPlatformResourceAnnotations
         $settings = $this->getKeyValueSettingsFromComment($comment);
         $properties = [];
         if(isset($settings['enabled'])) {
-            $properties[] = '    "pagination_enabled"=' . ($settings['enabled'] === 'true' ? 'true' : 'false');
+            //Safest approach is to switch off if explicitly set to false - anything else and we leave it on.
+            $properties[] = '    "pagination_enabled"=' . ($settings['enabled'] === 'false' ? 'false' : 'true');
         } else {
-            //User has put in a pagination comment but not been explicit so assume thay want pagination on.
+            //User has put in a pagination comment but not been explicit so safest approach is to assume thay want pagination on.
             $properties[] = '    "pagination_enabled"=true';
         }
 
@@ -60,13 +61,11 @@ class ApiPlatformResourceAnnotations
             $properties[] = ' "maximum_items_per_page"=' . $itemsPerPage;
         }
 
+        //Only activate client enablement if we can discern the correct intent.
+        //If we leave annotation out it will revert to 'safe' base server configuration
         if(isset($settings['client_control'])) {
             $properties[] = ' "pagination_client_enabled"=' . ($settings['client_control'] === 'true' ? 'true' : 'false');
             $properties[] = ' "client_items_per_page"=' . ($settings['client_control'] === 'true' ? 'true' : 'false');
-        } else {
-            //User has put in a pagination comment but not been explicit so assume thay want pagination on.
-            $properties[] = ' "pagination_client_enabled"=false';
-            $properties[] = ' "client_items_per_page"=false';
         }
 
         return $properties;
