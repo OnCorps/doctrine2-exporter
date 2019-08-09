@@ -31,8 +31,8 @@ class ApiPlatformManager
         if(!$this->include) {
             return [];
         }
-        return (new ApiPlatformResourceAnnotations())
-            ->buildAnnotations($this->table)
+        return (new ApiPlatformResourceAnnotations($this->table))
+            ->buildAnnotations()
             ->getAnnotations();
     }
 
@@ -48,12 +48,12 @@ class ApiPlatformManager
         $annotations = [];
 
         foreach($classes as $class => $comment){
-            $provider = new $class;
+            $provider = new $class($this->table);
             $annotations = array_merge(
                 $annotations,
                 $provider
                     ->processFields($comment)
-                    ->buildAnnotations($this->table)
+                    ->buildAnnotations()
                     ->getAnnotations()
             );
         }

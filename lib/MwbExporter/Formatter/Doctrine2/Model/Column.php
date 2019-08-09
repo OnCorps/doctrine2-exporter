@@ -134,4 +134,9 @@ class Column extends BaseColumn
         }
         return false;
     }
+
+    public function isForeign()
+    {
+       return (count($this->getLocalForeignKeys()) + count($this->getForeignKeys())) > 0;
+    }
 }

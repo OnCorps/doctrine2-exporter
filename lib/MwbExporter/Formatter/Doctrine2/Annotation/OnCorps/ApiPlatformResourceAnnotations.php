@@ -7,14 +7,37 @@ namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
 use MwbExporter\Formatter\Doctrine2\CustomComment;
 
+/**
+ * Class ApiPlatformResourceAnnotations
+ * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps
+ */
 class ApiPlatformResourceAnnotations
 {
-
+    
     const COMMENT_FIELD_ENTRY_DELIMITER = ",";
     const COMMENT_FIELD_VALUE_DELIMITER = ":";
     const PROPERTIES_ANNOTATION_DELIMITER = ',';
 
+    /**
+     * @var array
+     */
     protected $annotations = [];
+    
+    /**
+     * @var Table
+     */
+    protected $table;
+
+    /**
+     * ApiPlatformResourceAnnotations constructor.
+     *
+     * @param Table $table
+     */
+    public function __construct(Table $table)
+    {
+        $this->table = $table;
+    }
+    
     /**
      * @return array
      */
@@ -28,8 +51,10 @@ class ApiPlatformResourceAnnotations
      *
      * @return $this
      */
-    public function buildAnnotations(Table $table) : self
+    public function buildAnnotations() : self
     {
+        $table = $this->table;
+
         $this->annotations[] = $table->getAnnotation('@ApiResource(', null, [], '');
         $this->annotations[] = '    attributes={';
         $this->annotations[] = '    '.implode(self::PROPERTIES_ANNOTATION_DELIMITER, $this->getPaginationPropertiesAnnotation($table));
@@ -38,8 +63,14 @@ class ApiPlatformResourceAnnotations
         return $this;
     }
 
-    public function getPaginationPropertiesAnnotation(Table $table) : array
+    /**
+     * @param Table $table
+     *
+     * @return array
+     */
+    public function getPaginationPropertiesAnnotation() : array
     {
+        $table = $this->table;
         $comment = $table->parseComment(CustomComment::API_PLATFORM_PAGINATION);
         $settings = $this->getKeyValueSettingsFromComment($comment);
         $properties = [];
@@ -71,6 +102,11 @@ class ApiPlatformResourceAnnotations
         return $properties;
     }
 
+    /**
+     * @param string|null $comment
+     *
+     * @return array
+     */
     private function getKeyValueSettingsFromComment(?string $comment = '')
     {
         $settings = [];
