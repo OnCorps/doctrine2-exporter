@@ -27,6 +27,7 @@
 
 namespace MwbExporter\Formatter\Doctrine2\Annotation\Model;
 
+use Doctrine\Common\Inflector\Inflector;
 use MwbExporter\Formatter\Doctrine2\Annotation\Formatter;
 use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion\PropertyLevelAssertionBuilderProvider;
 use MwbExporter\Formatter\Doctrine2\CustomComment;
@@ -108,6 +109,16 @@ class Column extends BaseColumn
         } 
 
         return $this;
+    }
+
+    /**
+     * Get raw column name.
+     *
+     * @return string
+     */
+    public function getColumnName()
+    {
+        return Inflector::camelize($this->getName());
     }
 
     public function writeGetterAndSetter(WriterInterface $writer)
