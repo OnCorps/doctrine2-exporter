@@ -8,9 +8,9 @@ use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
 use MwbExporter\Object\Annotation;
 
 /**
- * Builds Unique Entity assertion analysing the primaries in the table.
+ * Applies NotNull assertion where needed respecting diagram specification
  *
- * Class UniqueEntityAssertion
+ * Class NotNullAssertion
  * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion
  */
 class NotNullAssertion implements PropertyLevelAssertionAnnotationInterface
