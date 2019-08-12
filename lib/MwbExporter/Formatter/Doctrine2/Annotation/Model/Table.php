@@ -28,9 +28,9 @@
 namespace MwbExporter\Formatter\Doctrine2\Annotation\Model;
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Formatter;
-use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
-use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion\ClassLevelAssertionBuilderProvider;
-use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion\PropertyLevelAssertionBuilderProvider;
+use MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
+use MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform\Assertion\ClassLevelAssertionBuilderProvider;
+use MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform\Assertion\PropertyLevelAssertionBuilderProvider;
 use MwbExporter\Formatter\Doctrine2\CustomComment;
 use MwbExporter\Formatter\Doctrine2\Model\Table as BaseTable;
 use MwbExporter\Helper\Comment;
@@ -268,7 +268,7 @@ class Table extends BaseTable
             ->write(' *')
             ->writeIf($comment, $comment);
 
-        $apiPlatformManager = new OnCorps\ApiPlatformManager($this);
+        $apiPlatformManager = new ApiPlatform\ApiPlatformManager($this);
 
         $apiResourceAnnotations = $apiPlatformManager->getApiResourceAnnotations();
         if($apiResourceAnnotations) {

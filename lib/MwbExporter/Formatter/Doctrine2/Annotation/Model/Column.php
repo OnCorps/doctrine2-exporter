@@ -27,17 +27,17 @@
 
 namespace MwbExporter\Formatter\Doctrine2\Annotation\Model;
 
+use Doctrine\Common\Inflector\Inflector;
 use MwbExporter\Formatter\Doctrine2\Annotation\Formatter;
-use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion\PropertyLevelAssertionBuilderProvider;
-use MwbExporter\Formatter\Doctrine2\CustomComment;
+use MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform\Assertion\PropertyLevelAssertionBuilderProvider;
 use MwbExporter\Formatter\Doctrine2\Model\Column as BaseColumn;
 use MwbExporter\Writer\WriterInterface;
-use MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
+use MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
 
 class Column extends BaseColumn
 {
 
-    use OnCorps\ApiPlatformColumnExtensions;
+    use ApiPlatform\ApiPlatformColumnExtensions;
 
     private function getStringDefaultValue() {
         $defaultValue = $this->getDefaultValue();
@@ -108,6 +108,16 @@ class Column extends BaseColumn
         } 
 
         return $this;
+    }
+
+    /**
+     * Get raw column name.
+     *
+     * @return string
+     */
+    public function getColumnName()
+    {
+        return Inflector::camelize($this->getName());
     }
 
     public function writeGetterAndSetter(WriterInterface $writer)
@@ -191,7 +201,7 @@ class Column extends BaseColumn
     private function isImportedPrimaryKey(): bool {
         return (bool)(
             $this->parseComment(
-                CustomComment::PRIMARY_KEY_REQUIRES_EXTERNAL_IMPORT,
+                ApiPlatform\CustomComment::PRIMARY_KEY_REQUIRES_EXTERNAL_IMPORT,
                 $this->getComment()
             ) === 'true'
             ??
