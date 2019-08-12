@@ -6,17 +6,33 @@
  * Time: 14:18
  */
 
-namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
+namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
 
+use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;
 use MwbExporter\Formatter\Doctrine2\Model;
 use MwbExporter\Model\ForeignKey;
 
 /**
  * Class ApiPlatformSearchAnnotations
- * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps
+ * @package MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform
  */
 class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
 {
+
+    protected function getKeyFields()
+    {
+        /** @var Column $column */
+        foreach ($this->table->getColumns() as $column) {
+            if($column->isPrimary() || $column->isForeign()) {
+                $name = $column->getColumnName();
+                $this->fields[$name] = (object)[
+                    'filterName' => $name,
+                    'name' => $name,
+                    'modifiers' => ['exact'],
+                ];
+            }
+        }
+    }
 
     /**
      * @var array
@@ -45,14 +61,14 @@ class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
     ];
 
     /**
-     * @param Model\Table $table
      * @param string      $fieldName
      * @param string      $type
      *
      * @return string
      */
-    public function buildAnnotationProperty(Model\Table $table, Model\Column $column, string $type): string
+    public function buildAnnotationProperty(Model\Column $column, string $type): string
     {
+        $table = $this->table;
         $converter = $table->getFormatter()->getDatatypeConverter();
         $nativeType = $converter->getNativeType($converter->getMappedType($column));
         if ($nativeType != $type) {
@@ -86,7 +102,5 @@ class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
         }
 
         return $this->generateAnnotationPropertyDetails($name, $nativeType);
-
-
     }
 }

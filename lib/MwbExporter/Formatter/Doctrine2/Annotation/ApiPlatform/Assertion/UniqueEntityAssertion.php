@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion;
+namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform\Assertion;
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
 
@@ -9,7 +9,7 @@ use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
  * Builds Unique Entity assertion analysing the primaries in the table.
  *
  * Class UniqueEntityAssertion
- * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion
+ * @package MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform\Assertion
  */
 class UniqueEntityAssertion implements ClassLevelAssertionAnnotationInterface
 {

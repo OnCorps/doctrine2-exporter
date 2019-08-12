@@ -11,7 +11,7 @@ use MwbExporter\Object\Annotation;
  * Applies NotNull assertion where needed respecting diagram specification
  *
  * Class NotNullAssertion
- * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion
+ * @package MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform\Assertion
  */
 class NotNullAssertion implements PropertyLevelAssertionAnnotationInterface
 {

@@ -6,23 +6,31 @@
  * Time: 16:21
  */
 
-namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
+namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
 
+use Doctrine\Common\Inflector\Inflector;
+use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;
+use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
 use MwbExporter\Formatter\Doctrine2\Model;
 
 /**
  * Class ApiPlatformFieldAnnotations
- * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps
+ * @package MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform
  */
 abstract class ApiPlatformFieldAnnotations
 {
     /**
-     * @param Model\Table $table
+     * @param Column      $column
      * @param string      $fieldName
      *
      * @return string
      */
-    abstract function buildAnnotationProperty(Model\Table $table, Model\Column $column, string $type): string;
+    abstract function buildAnnotationProperty(Model\Column $column, string $type): string;
+
+    protected function getKeyFields()
+    {
+
+    }
 
     const COMMENT_FIELD_DELIMITER = ",";
     const COMMENT_FIELD_PROPERTIES_DELIMITER = ":";
@@ -42,6 +50,22 @@ abstract class ApiPlatformFieldAnnotations
      * @var array
      */
     protected $annotations = [];
+
+
+    /**
+     * @var Table
+     */
+    protected $table;
+
+    /**
+     * ApiPlatformFieldAnnotations constructor.
+     *
+     * @param Table $table
+     */
+    public function __construct(Table $table)
+    {
+        $this->table = $table;
+    }
 
     /**
      * @return bool
@@ -74,12 +98,14 @@ abstract class ApiPlatformFieldAnnotations
      */
     public function processFields(?string $comment = null): self
     {
+        $this->getKeyFields();
+
         if(empty($comment)) {
             return $this;
         }
+
         $rawApiFilters = explode(SELF::COMMENT_FIELD_DELIMITER, strtolower(trim($comment)));
         if (count($rawApiFilters) === 0 || $rawApiFilters[0] == "") {
-            $this->fields = [];
             return $this;
         }
 
@@ -87,10 +113,11 @@ abstract class ApiPlatformFieldAnnotations
             $rawFilterDetails = explode(self::COMMENT_FIELD_PROPERTIES_DELIMITER, trim($rawFilter));
             if (count($rawFilterDetails) > 0 && $rawFilterDetails[0] != "") {
                 $name = array_shift($rawFilterDetails);
+                $name = Inflector::camelize($name);
                 $this->fields[$name] =  (object)[
                     'filterName' => $name,
                     'name' => $name,
-                    'modifiers' => $rawFilterDetails
+                    'modifiers' => $rawFilterDetails,
                 ];
             }
         }
@@ -121,8 +148,10 @@ abstract class ApiPlatformFieldAnnotations
      *
      * @return $this
      */
-    public function buildAnnotations(Model\Table $table)
+    public function buildAnnotations()
     {
+        $table = $this->table;
+
         $this->annotations = [];
 
         foreach ($this->typeInfo as $type => $typeInfoArray) {
@@ -132,7 +161,7 @@ abstract class ApiPlatformFieldAnnotations
             foreach ($table->getColumns() as $column) {
                 $name = $column->getColumnName();
                 if (isset($this->fields[$name])) {
-                    $property = $this->buildAnnotationProperty($table, $column, $type);
+                    $property = $this->buildAnnotationProperty($column, $type);
                     if(!empty($property)){
                         $properties[] = $property;
                     }

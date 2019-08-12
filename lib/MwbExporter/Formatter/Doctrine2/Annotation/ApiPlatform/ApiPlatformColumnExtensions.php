@@ -1,7 +1,7 @@
 <?php
 
 
-namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
+namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
 
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;

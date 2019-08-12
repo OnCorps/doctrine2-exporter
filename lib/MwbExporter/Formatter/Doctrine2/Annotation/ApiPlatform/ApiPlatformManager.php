@@ -1,12 +1,11 @@
 <?php
 
 
-namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
+namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Formatter;
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
-use MwbExporter\Formatter\Doctrine2\CustomComment;
 use MwbExporter\Writer\WriterInterface;
 
 class ApiPlatformManager
@@ -31,8 +30,8 @@ class ApiPlatformManager
         if(!$this->include) {
             return [];
         }
-        return (new ApiPlatformResourceAnnotations())
-            ->buildAnnotations($this->table)
+        return (new ApiPlatformResourceAnnotations($this->table))
+            ->buildAnnotations()
             ->getAnnotations();
     }
 
@@ -48,12 +47,12 @@ class ApiPlatformManager
         $annotations = [];
 
         foreach($classes as $class => $comment){
-            $provider = new $class;
+            $provider = new $class($this->table);
             $annotations = array_merge(
                 $annotations,
                 $provider
                     ->processFields($comment)
-                    ->buildAnnotations($this->table)
+                    ->buildAnnotations()
                     ->getAnnotations()
             );
         }
