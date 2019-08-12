@@ -1,6 +1,6 @@
 # README for OnCorps extenstions
 
-These are the supported extensions provided by OnCorps to this exporter which converts [MySQL Workbench](http://www.mysql.com/products/workbench/) Models (\*.mwb) to a Doctrine 2 Schema.
+These are the ApiPlatform supported extensions to this exporter which converts [MySQL Workbench](http://www.mysql.com/products/workbench/) Models (\*.mwb) to a Doctrine 2 Schema.
 
 
 #### Model Comment Behavior

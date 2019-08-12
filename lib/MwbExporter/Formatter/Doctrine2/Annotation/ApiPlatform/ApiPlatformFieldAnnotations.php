@@ -6,15 +6,16 @@
  * Time: 16:21
  */
 
-namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
+namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
 
+use Doctrine\Common\Inflector\Inflector;
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
 use MwbExporter\Formatter\Doctrine2\Model;
 
 /**
  * Class ApiPlatformFieldAnnotations
- * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps
+ * @package MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform
  */
 abstract class ApiPlatformFieldAnnotations
 {
@@ -112,6 +113,7 @@ abstract class ApiPlatformFieldAnnotations
             $rawFilterDetails = explode(self::COMMENT_FIELD_PROPERTIES_DELIMITER, trim($rawFilter));
             if (count($rawFilterDetails) > 0 && $rawFilterDetails[0] != "") {
                 $name = array_shift($rawFilterDetails);
+                $name = Inflector::camelize($name);
                 $this->fields[$name] =  (object)[
                     'filterName' => $name,
                     'name' => $name,

@@ -6,7 +6,7 @@
  * Time: 14:18
  */
 
-namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
+namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;
 use MwbExporter\Formatter\Doctrine2\Model;
@@ -14,7 +14,7 @@ use MwbExporter\Model\ForeignKey;
 
 /**
  * Class ApiPlatformSearchAnnotations
- * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps
+ * @package MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform
  */
 class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
 {

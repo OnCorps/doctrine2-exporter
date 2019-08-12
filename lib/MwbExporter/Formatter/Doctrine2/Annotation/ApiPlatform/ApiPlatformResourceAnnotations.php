@@ -1,15 +1,14 @@
 <?php
 
 
-namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps;
+namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
 
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
-use MwbExporter\Formatter\Doctrine2\CustomComment;
 
 /**
  * Class ApiPlatformResourceAnnotations
- * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps
+ * @package MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform
  */
 class ApiPlatformResourceAnnotations
 {

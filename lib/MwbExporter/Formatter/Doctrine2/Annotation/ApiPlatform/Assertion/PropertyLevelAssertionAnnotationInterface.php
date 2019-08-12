@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion;
+namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform\Assertion;
 
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;
 

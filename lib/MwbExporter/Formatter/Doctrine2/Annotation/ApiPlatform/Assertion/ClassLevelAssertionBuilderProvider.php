@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion;
+namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform\Assertion;
 
 /**
  * Config class for tuning the stack for the builder and getting it
  * Class ClassLevelBuilderProvider
- * @package MwbExporter\Formatter\Doctrine2\Annotation\OnCorps\Assertion
+ * @package MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform\Assertion
  */
 class ClassLevelAssertionBuilderProvider
 {
