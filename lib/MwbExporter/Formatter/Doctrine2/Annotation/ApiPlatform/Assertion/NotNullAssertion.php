@@ -29,6 +29,8 @@ class NotNullAssertion implements PropertyLevelAssertionAnnotationInterface
         if(isset($joinAnnotation['nullable'])) {
             if($joinAnnotation['nullable'] == false) {
                 return ' * @NotNull()';
+            } else {
+                return ' *';
             }
         }
         return null;

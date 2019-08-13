@@ -186,7 +186,7 @@ class Table extends BaseTable
             $joins[] = $this->getAnnotation('JoinColumn', array(
                 'name'                  => $this->quoteIdentifier($lcols[$i]->getColumnName()),
                 'referencedColumnName'  => $this->quoteIdentifier($fcols[$i]->getColumnName()),
-                'nullable'              => $lcols[$i]->getNullableValue(true),
+                'nullable'              => !($fkey->getParameters()->get($owningSide ? 'mandatory' : 'referencedMandatory', true)), //$lcols[$i]->getNullableValue(true),
                 'onDelete'              => $onDelete,
             ));
         }
@@ -608,7 +608,6 @@ class Table extends BaseTable
 
                 $this->writeAnnotationAssertionsGivenJoinAnnotation($writer, $this->getJoins($local));
 
-
                 $writer->writeCallback(function(WriterInterface $writer, Table $_this = null) use ($local) {
                         if (count($orders = $_this->getFormatter()->getOrderOption($local->parseComment('order')))) {
                             $writer
@@ -670,7 +669,7 @@ class Table extends BaseTable
                     ->write(' * '.$this->getAnnotation('ManyToOne', $annotationOptions))
                     ->write(' * '.$this->getJoins($foreign, false));
 
-                $this->writeAnnotationAssertionsGivenJoinAnnotation($writer, $this->getJoins($foreign));
+                $this->writeAnnotationAssertionsGivenJoinAnnotation($writer, $this->getJoins($foreign, false));
 
                 $writer
                     ->write(' */')
@@ -691,7 +690,8 @@ class Table extends BaseTable
                     ->writeIf($cacheMode, ' * '.$this->getAnnotation('Cache', array($cacheMode)))
                     ->write(' * '.$this->getAnnotation('OneToOne', $annotationOptions))
                     ->write(' * '.$this->getJoins($foreign, false));
-                    $this->writeAnnotationAssertionsGivenJoinAnnotation($writer, $this->getJoins($foreign));
+
+                    $this->writeAnnotationAssertionsGivenJoinAnnotation($writer, $this->getJoins($foreign, false));
 
                     $writer->write(' */')
                     ->write('protected $'.lcfirst($targetEntity).';')
