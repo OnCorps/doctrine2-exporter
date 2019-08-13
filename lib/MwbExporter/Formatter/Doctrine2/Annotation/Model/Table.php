@@ -626,9 +626,10 @@ class Table extends BaseTable
                 $writer
                     ->write('/**')
                     ->writeIf($cacheMode, ' * '.$this->getAnnotation('Cache', array($cacheMode)))
-                    ->write(' * '.$this->getAnnotation('OneToOne', $annotationOptions));
+                    ->write(' * '.$this->getAnnotation('OneToOne', $annotationOptions))
+                    ->write(' * '.$this->getJoins($local));
 
-                $this->writeAnnotationAssertionsGivenJoinAnnotation($writer,$this->getAnnotation('OneToOne', $annotationOptions));
+                $this->writeAnnotationAssertionsGivenJoinAnnotation($writer,$this->getJoins($local));
 
                 $writer->write(' */')
                     ->write('protected $'.lcfirst($targetEntity).';')
