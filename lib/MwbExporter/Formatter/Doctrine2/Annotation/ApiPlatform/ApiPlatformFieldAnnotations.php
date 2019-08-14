@@ -25,7 +25,7 @@ abstract class ApiPlatformFieldAnnotations
      *
      * @return string
      */
-    abstract function buildAnnotationProperty(Model\Column $column, string $type): string;
+    abstract function buildAnnotationProperty(Column $column, string $type): string;
 
     protected function getKeyFields()
     {
@@ -159,7 +159,7 @@ abstract class ApiPlatformFieldAnnotations
             $properties = [];
             /** @var Column $column */
             foreach ($table->getColumns() as $column) {
-                $name = $column->getColumnName();
+                $name = $column->getPropertyName();
                 if (isset($this->fields[$name])) {
                     $property = $this->buildAnnotationProperty($column, $type);
                     if(!empty($property)){

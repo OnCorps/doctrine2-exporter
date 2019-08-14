@@ -8,7 +8,7 @@
 
 namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
 
-use MwbExporter\Formatter\Doctrine2\Model;
+use MwbExporter\Formatter\Doctrine2\Annotation\Model;
 
 class ApiPlatformSortAnnotations extends ApiPlatformFieldAnnotations
 {
@@ -31,7 +31,7 @@ class ApiPlatformSortAnnotations extends ApiPlatformFieldAnnotations
      */
     public function buildAnnotationProperty(Model\Column $column, string $type): string
     {
-        $name = $column->getColumnName();
+        $name = $column->getPropertyName();
         return $this->generateAnnotationPropertyDetails($name, 'default');
     }
 

@@ -102,7 +102,7 @@ class Column extends BaseColumn
                 ->writeIf($isBehavioralColumn && strstr($this->getColumnName(), 'size'),
                         ' * @Gedmo\UploadableFileSize')
                 ->write(' */')
-                ->write('protected $'.$this->getColumnName().$this->getStringDefaultValue().';')
+                ->write('protected $'.$this->getPropertyName().$this->getStringDefaultValue().';')
                 ->write('')
             ;
         } 
@@ -111,11 +111,11 @@ class Column extends BaseColumn
     }
 
     /**
-     * Get raw column name.
+     * Explicit function to get the PHP class property name for the column.
      *
      * @return string
      */
-    public function getColumnName()
+    public function getPropertyName()
     {
         return Inflector::camelize($this->getName());
     }
@@ -216,7 +216,7 @@ class Column extends BaseColumn
      * @param string $typehint
      */
     private function writeSetter(WriterInterface $writer, string $nativeType, Table $table, string $typehint): void {
-        $columnName = $this->getColumnName();
+        $columnName = $this->getPropertyName();
         $writer
             ->write('/**')
             ->write(' * Set the value of ' . $columnName . '.')
@@ -240,7 +240,7 @@ class Column extends BaseColumn
      * @param string $nativeType
      */
     private function writeGetter(WriterInterface $writer, string $nativeType): void {
-        $columnName = $this->getColumnName();
+        $columnName = $this->getPropertyName();
         $writer->write('/**')
             ->write(' * Get the value of ' . $columnName . '.')
             ->write(' *')
