@@ -24,7 +24,7 @@ class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
         /** @var Column $column */
         foreach ($this->table->getColumns() as $column) {
             if($column->isPrimary() || $column->isForeign()) {
-                $name = $column->getColumnName();
+                $name = $column->getPropertyName();
                 $this->fields[$name] = (object)[
                     'filterName' => $name,
                     'name' => $name,
@@ -66,7 +66,7 @@ class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
      *
      * @return string
      */
-    public function buildAnnotationProperty(Model\Column $column, string $type): string
+    public function buildAnnotationProperty(Column $column, string $type): string
     {
         $table = $this->table;
         $converter = $table->getFormatter()->getDatatypeConverter();
@@ -74,7 +74,7 @@ class ApiPlatformSearchAnnotations extends ApiPlatformFieldAnnotations
         if ($nativeType != $type) {
             return '';
         }
-        $name = $column->getColumnName();
+        $name = $column->getPropertyName();
         $foreginKeys = $column->getForeignKeys();
         $filterName = null;
         /** @var ForeignKey $foreign */

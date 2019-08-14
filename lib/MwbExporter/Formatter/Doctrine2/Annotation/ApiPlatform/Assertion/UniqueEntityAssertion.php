@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform\Assertion;
 
+use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
 
 /**
@@ -16,9 +17,10 @@ class UniqueEntityAssertion implements ClassLevelAssertionAnnotationInterface
     public function buildAnnotation(Table $table): ?string
     {
         $primaries = [];
+        /** @var Column $column */
         foreach ($table->getColumns() as $column) {
             if ($column->isPrimary()) {
-                $primaries[] = '"' . $column->getColumnName() . '"';
+                $primaries[] = '"' . $column->getPropertyName() . '"';
             }
         }
 

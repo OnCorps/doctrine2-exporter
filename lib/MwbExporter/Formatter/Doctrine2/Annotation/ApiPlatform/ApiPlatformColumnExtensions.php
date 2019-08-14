@@ -24,7 +24,7 @@ trait ApiPlatformColumnExtensions
     }
 
     public function writePrimaryKeyFetcher(WriterInterface $writer, string $nativeType, string $getterName = 'fetchId') {
-        $columnName = $this->getColumnName();
+        $columnName = $this->getPropertyName();
 
         $writer->write('/**')
             ->write(' * Get the value of ' . $columnName . '.')

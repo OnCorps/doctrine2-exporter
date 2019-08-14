@@ -626,10 +626,10 @@ class Table extends BaseTable
                 $writer
                     ->write('/**')
                     ->writeIf($cacheMode, ' * '.$this->getAnnotation('Cache', array($cacheMode)))
-                    ->write(' * '.$this->getAnnotation('OneToOne', $annotationOptions))
-                    ->write(' * '.$this->getJoins($local));
+                    ->write(' * '.$this->getAnnotation('OneToOne', $annotationOptions));
+                    //->write(' * '.$this->getJoins($local));
 
-                $this->writeAnnotationAssertionsGivenJoinAnnotation($writer,$this->getJoins($local));
+                $this->writeAnnotationAssertionsGivenJoinAnnotation($writer, $this->getJoins($local));
 
                 $writer->write(' */')
                     ->write('protected $'.lcfirst($targetEntity).';')
@@ -809,9 +809,10 @@ class Table extends BaseTable
 
     public function writeCurrentTimestampConstructor(WriterInterface $writer)
     {
+        /** @var Column $column */
         foreach ($this->getColumns() as $column) {
             if ('CURRENT_TIMESTAMP' === $column->getDefaultValue()) {
-                $writer->write('$this->%s = new \DateTime(\'now\');', $column->getColumnName());
+                $writer->write('$this->%s = new \DateTime(\'now\');', $column->getPropertyName());
             }
         }
     }
@@ -1121,7 +1122,7 @@ class Table extends BaseTable
         foreach ($this->getColumns() as $column) {
             /** @var Column $column */
             if(!$column->isIgnored()) {
-                $varNames[] = $column->getColumnName();
+                $varNames[] = $column->getPropertyName();
             }
         }
         $writer
