@@ -115,9 +115,9 @@ abstract class ApiPlatformFieldAnnotations
                 $name = array_shift($rawFilterDetails);
                 $name = Inflector::camelize($name);
                 $this->fields[$name] =  (object)[
-                    'filterName' => $name,
-                    'name' => $name,
-                    'modifiers' => $rawFilterDetails,
+                    'filterName' => trim($name),
+                    'name' => trim($name),
+                    'modifiers' => trim($rawFilterDetails),
                 ];
             }
         }
