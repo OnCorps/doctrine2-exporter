@@ -135,6 +135,21 @@ class Column extends BaseColumn
         return false;
     }
 
+    public function extractDoctrineType(): ?string
+    {
+        $comment = $this->parameters->get('comment');
+        $type = null;
+        $matches = null;
+
+        if (preg_match("{^\(DC2Type:[ ]*([a-z_]+)[ ]*\)$}", $comment, $matches)) {
+            // $matches[1] will contain the text matched by the ([a-z_]+) portion of the regex, which
+            // is the name of our type.
+            $type = $matches[1];
+        }
+
+        return $type;
+    }
+
     public function isForeign()
     {
        return (count($this->getLocalForeignKeys()) + count($this->getForeignKeys())) > 0;
