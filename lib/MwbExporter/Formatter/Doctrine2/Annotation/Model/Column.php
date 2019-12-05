@@ -182,9 +182,7 @@ class Column extends BaseColumn
         if ($this->isUnsigned()) {
             $attributes['options'] = array('unsigned' => true);
         }
-        if ($this->isUnique) {
-            $attributes['unique'] = $this->isUnique;
-        }
+
         if ('json' === $attributes['type']) {
             $attributes['options']['jsonb'] = true;
         }
