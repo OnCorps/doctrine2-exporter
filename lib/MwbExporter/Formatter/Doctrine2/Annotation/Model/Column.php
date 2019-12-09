@@ -77,14 +77,8 @@ class Column extends BaseColumn
                 }
             }
 
-            if($this->isUuid()) {
-                $writer
-                    ->write(' * '.$this->getTable()->getAnnotation('Column', ['type' => 'guid', 'unique' => true]))
-                ;
-            } else {
-                $writer
-                    ->write(' * '.$this->getTable()->getAnnotation('Column', $this->asAnnotation()));
-            }
+            $writer
+                ->write(' * '.$this->getTable()->getAnnotation('Column', $this->asAnnotation()));
 
             $writer
                 ->writeIf($useBehavioralExtensions && $this->getColumnName() === 'created_at',
@@ -158,10 +152,21 @@ class Column extends BaseColumn
      */
     public function asAnnotation()
     {
+        // Preserved for backwards-compatibility, but we can also use the Doctrine DC2Type annotations
+        // to indicate doctrine types in field comments (e.g. "(DC2Type:guid)", "(DC2Type:json)", etc).
+        if ($this->isUuid()) {
+            return ['type' => 'guid', 'unique' => true];
+        }
+
         $attributes = array(
             'name' => ($columnName = $this->getTable()->quoteIdentifier($this->getColumnName())) !== $this->getColumnName() ? $columnName : null,
             'type' => $this->getFormatter()->getDatatypeConverter()->getMappedType($this),
         );
+
+        if (($type = $this->extractDoctrineType())) {
+            $attributes['type'] = $type;
+        }
+
         if (($length = $this->parameters->get('length')) && ($length != -1)) {
             $attributes['length'] = (int) $length;
         }
