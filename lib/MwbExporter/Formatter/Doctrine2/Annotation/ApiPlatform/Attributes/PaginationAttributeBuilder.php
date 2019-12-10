@@ -10,6 +10,9 @@ class PaginationAttributeBuilder implements ClassLevelAttributeInterface
 {
     const PROPERTIES_ANNOTATION_DELIMITER = ',';
 
+    /**
+     * @var Table
+     */
     private $table;
 
     private $commentSettingGenerator;
