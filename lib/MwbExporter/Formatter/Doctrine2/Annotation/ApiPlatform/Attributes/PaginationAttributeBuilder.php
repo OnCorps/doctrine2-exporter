@@ -27,6 +27,9 @@ class PaginationAttributeBuilder implements ClassLevelAttributeInterface
         $this->commentSettingGenerator = $commentSettingGenerator;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function buildAttribute(): ?string
     {
         $comment = $this->table->parseComment(CustomComment::API_PLATFORM_PAGINATION);
