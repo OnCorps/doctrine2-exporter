@@ -70,7 +70,7 @@ class ClassLevelAttributeAnnotations
         return $this->buildAnnotations();
     }
 
-    private function buildAnnotations(): void
+    private function buildAnnotations(): array
     {
         $table = $this->table;
 
