@@ -15,7 +15,7 @@ class CommentSettingGenerator
      *
      * @return array
      */
-    public function getKeyValueSettingsFromComment(?string $comment = '')
+    public function getKeyValueSettingsFromComment(?string $comment = ''): array
     {
         $settings = [];
 
