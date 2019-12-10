@@ -15,6 +15,9 @@ class PaginationAttributeBuilder implements ClassLevelAttributeInterface
      */
     private $table;
 
+    /**
+     * @var CommentSettingGenerator
+     */
     private $commentSettingGenerator;
 
 
