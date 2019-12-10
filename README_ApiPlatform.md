@@ -31,7 +31,7 @@ These are the ApiPlatform supported extensions to this exporter which converts [
 
     Allows management of pagination. Options:
     
-    enabled: [true | false] - If option is fully omitted then default would be hinerited by global configuration in api-platform.yaml
+    enabled: [true | false] - If not specified then the default is to inherit the global setting in api-platform.yaml
     
     items: [integer] - Override the default items per page. Server default depends on the ApiPlatform default set for that service. If greated than then maximum items per page configuration then it will return the max items per page.
     
