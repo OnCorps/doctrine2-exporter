@@ -20,22 +20,22 @@ class ClassLevelAttributeAnnotations
     /**
      * @var array
      */
-    protected $attributes = [];
+    private $attributes = [];
 
     /**
      * @var ClassLevelAttributeInterface[]
      */
-    protected $classLevelAttributes;
+    private $classLevelAttributes;
 
     /**
      * @var array
      */
-    protected $annotations = [];
+    private $annotations = [];
 
     /**
      * @var Table
      */
-    protected $table;
+    private $table;
 
     /**
      * ApiPlatformClassLevelAttributeAnnotations constructor.
