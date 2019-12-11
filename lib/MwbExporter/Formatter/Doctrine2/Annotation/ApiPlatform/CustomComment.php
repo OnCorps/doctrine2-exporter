@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
 
+use ReflectionClass;
 /**
  * A dictionary class of what is known in the exporter and therfore can safely be used in mysql workbench as comment
  *
@@ -15,4 +16,11 @@ class CustomComment
     const API_PLATFORM_SEARCH = 'search';
     const API_PLATFORM_SORT = 'sort';
     const API_PLATFORM_PAGINATION = 'pagination';
+
+    public function getConstants(): array
+    {
+        $reflectionClass = new ReflectionClass($this);
+
+        return $reflectionClass->getConstants();
+    }
 }

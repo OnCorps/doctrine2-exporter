@@ -3,10 +3,9 @@
 
 namespace MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform;
 
+use MwbExporter\Formatter\Doctrine2\Annotation\ApiPlatform\Attributes\ClassLevelAttributeAnnotations;
 use MwbExporter\Formatter\Doctrine2\Annotation\Formatter;
-use MwbExporter\Formatter\Doctrine2\Annotation\Model\Column;
 use MwbExporter\Formatter\Doctrine2\Annotation\Model\Table;
-use MwbExporter\Writer\WriterInterface;
 
 class ApiPlatformManager
 {
@@ -30,9 +29,8 @@ class ApiPlatformManager
         if(!$this->include) {
             return [];
         }
-        return (new ApiPlatformResourceAnnotations($this->table))
-            ->buildAnnotations()
-            ->getAnnotations();
+
+        return (new ClassLevelAttributeAnnotations($this->table))->getAnnotations();
     }
 
     public function getApiFilterAnnotations() {
@@ -56,6 +54,7 @@ class ApiPlatformManager
                     ->getAnnotations()
             );
         }
+
         return $annotations;
     }
 
