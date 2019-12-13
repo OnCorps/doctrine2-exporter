@@ -117,7 +117,7 @@ abstract class ApiPlatformFieldAnnotations
                 $this->fields[$name] =  (object)[
                     'filterName' => trim($name),
                     'name' => trim($name),
-                    'modifiers' => trim($rawFilterDetails),
+                    'modifiers' => $rawFilterDetails,
                 ];
             }
         }
