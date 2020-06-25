@@ -920,6 +920,11 @@ class Table extends BaseTable
             } else {
                 $this->getDocument()->addLog(sprintf('  Applying setter/getter for "%s"', '1 <=> 1'));
 
+                // The setter will be type-hinted to allow null parameters to be passed in. Additional checks are
+                // carried out to ensure that no attempt is made to invoke a method on a NULL value. Note that calling
+                // $writer->indent() followed by $writer->outdent() has no practical effect, so it should be fine to
+                // do this between calls to $writer->writeif(<condition>, <statement>) where <condition> is the same
+                // for each call.
                 $writer
                     // setter
                     ->write('/**')
@@ -931,8 +936,11 @@ class Table extends BaseTable
                     ->write('public function set'.$local->getOwningTable()->getModelName().'('.$local->getOwningTable()->getNamespace().' $'.lcfirst($local->getOwningTable()->getModelName()).' = null)')
                     ->write('{')
                     ->indent()
-                        ->writeIf(!$local->isUnidirectional(), '$'.lcfirst($local->getOwningTable()->getModelName()).'->set'.$local->getReferencedTable()->getModelName().'($this);')
-                        ->write('$this->'.lcfirst($local->getOwningTable()->getModelName()).' = $'.lcfirst($local->getOwningTable()->getModelName()).';')
+                        ->writeIf(!$local->isUnidirectional(), 'if (!is_null($'.lcfirst($local->getOwningTable()->getModelName()).')) {')
+                        ->indent()
+                            ->writeIf(!$local->isUnidirectional(), '$'.lcfirst($local->getOwningTable()->getModelName()).'->set'.$local->getReferencedTable()->getModelName().'($this);')
+                        ->outdent()
+                        ->writeIf(!$local->isUnidirectional(), '}')->write('$this->'.lcfirst($local->getOwningTable()->getModelName()).' = $'.lcfirst($local->getOwningTable()->getModelName()).';')
                         ->write('')
                         ->write('return $this;')
                     ->outdent()
